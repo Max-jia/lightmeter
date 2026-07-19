@@ -3,28 +3,23 @@ import { NextResponse } from "next/server";
 
 /**
  * Google OAuth 登录入口
- * 支持 POST (表单提交) 和 GET (链接点击)
  */
 export async function GET(request: Request) {
-  return handleGoogleAuth(request);
-}
-export async function POST(request: Request) {
-  return handleGoogleAuth(request);
-}
-
-async function handleGoogleAuth(request: Request) {
   const supabase = await createClient();
+
+  // 强制使用线上域名（Vercel 环境下 request.url 可能不准）
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${new URL(request.url).origin}/api/auth/callback`,
+      redirectTo: `${baseUrl}/api/auth/callback`,
     },
   });
 
   if (error) {
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(error.message)}`, request.url),
+      new URL(`/login?error=${encodeURIComponent(error.message)}`, baseUrl),
       303
     );
   }
