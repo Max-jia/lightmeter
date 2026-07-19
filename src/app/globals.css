@@ -1,26 +1,222 @@
 @import "tailwindcss";
 
+/* ============================================
+   Darkroom v2 — Warm Darkroom + Amber Gold
+   Apple-inspired depth, glass, spring physics
+   ============================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── Warm Dark Surface System ── */
+  --color-bg-base: #1A1816;
+  --color-bg-surface: #242221;
+  --color-bg-elevated: #2E2C2A;
+  --color-bg-overlay: #3A3734;
+
+  /* ── Text ── */
+  --color-text-primary: #F5F0EB;
+  --color-text-secondary: #A9A09A;
+  --color-text-disabled: #6B6560;
+
+  /* ── Border ── */
+  --color-border-subtle: #3E3A37;
+  --color-border-default: #524E4A;
+
+  /* ── Accent: Photographic Gold ── */
+  --color-gold: #D4A045;
+  --color-gold-light: #E8BE6D;
+  --color-gold-glow: rgba(212, 160, 69, 0.18);
+  --color-gold-subtle: rgba(212, 160, 69, 0.08);
+
+  /* ── Accent: Warm Amber ── */
+  --color-amber: #C2853A;
+  --color-amber-glow: rgba(194, 133, 58, 0.15);
+
+  /* ── Semantic ── */
+  --color-success: #5EA880;
+  --color-success-bg: rgba(94, 168, 128, 0.12);
+  --color-warning: #D4A045;
+  --color-warning-bg: rgba(212, 160, 69, 0.12);
+  --color-error: #D4736A;
+  --color-error-bg: rgba(212, 115, 106, 0.12);
+
+  /* ── Glass ── */
+  --glass-bg: rgba(36, 34, 33, 0.75);
+  --glass-blur: 20px;
+  --glass-border: rgba(255, 255, 255, 0.06);
+
+  /* ── Elevation (4-level) ── */
+  --elevation-0: none;
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --elevation-2: 0 4px 14px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --elevation-3: 0 10px 30px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.35);
+  --elevation-4: 0 20px 50px rgba(0, 0, 0, 0.55), 0 8px 16px rgba(0, 0, 0, 0.4);
+
+  /* ── Radii ── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* ── Spring animation tokens ── */
+  --spring-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --spring-snappy: cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--color-bg-base);
+  --color-foreground: var(--color-text-primary);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ============================================
+   Base
+   ============================================ */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-secondary); }
+
+/* Selection */
+::selection {
+  background: var(--color-gold-glow);
+  color: var(--color-text-primary);
+}
+
+/* Focus */
+*:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Utility ~ Tailwind-friendly shorthand ── */
+.bg-base { background: var(--color-bg-base); }
+.bg-surface { background: var(--color-bg-surface); }
+.bg-elevated { background: var(--color-bg-elevated); }
+.bg-overlay { background: var(--color-bg-overlay); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-disabled { color: var(--color-text-disabled); }
+.border-subtle { border-color: var(--color-border-subtle); }
+.border-default { border-color: var(--color-border-default); }
+
+/* Glass utility */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+/* ── Elevation (Tailwind-compatible utility) ── */
+.shadow-1 { box-shadow: var(--elevation-1); }
+.shadow-2 { box-shadow: var(--elevation-2); }
+.shadow-3 { box-shadow: var(--elevation-3); }
+.shadow-4 { box-shadow: var(--elevation-4); }
+
+/* ── Spring press interaction ── */
+.spring-press {
+  transition: transform var(--duration-fast) var(--spring-bouncy),
+              box-shadow var(--duration-fast) var(--spring-smooth);
+}
+.spring-press:active {
+  transform: scale(0.97);
+}
+.spring-press:hover {
+  transform: scale(1.01);
+  box-shadow: var(--elevation-2);
+}
+
+/* ── Card with depth ── */
+.card-depth {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-1);
+  transition: box-shadow var(--duration-normal) var(--spring-smooth),
+              transform var(--duration-normal) var(--spring-smooth),
+              border-color var(--duration-normal) var(--spring-smooth);
+}
+.card-depth:hover {
+  box-shadow: var(--elevation-2);
+  border-color: var(--color-border-default);
+  transform: translateY(-1px);
+}
+.card-depth:active {
+  transform: scale(0.98);
+  box-shadow: var(--elevation-1);
+}
+
+/* ── Gold accent glow (for CTA, selected states) ── */
+.gold-glow {
+  box-shadow: 0 0 20px var(--color-gold-glow), var(--elevation-1);
+}
+.gold-glow:hover {
+  box-shadow: 0 0 30px var(--color-gold-glow), var(--elevation-2);
+}
+
+/* ── Shimmer skeleton ── */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-elevated) 25%,
+    var(--color-bg-overlay) 50%,
+    var(--color-bg-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ── Subtle gradient meshes (for hero / special cards) ── */
+.gradient-warm {
+  background: radial-gradient(ellipse at top right, rgba(212, 160, 69, 0.06), transparent 60%),
+              radial-gradient(ellipse at bottom left, rgba(194, 133, 58, 0.04), transparent 50%),
+              var(--color-bg-base);
+}
+
+.gradient-card {
+  background: linear-gradient(135deg, var(--color-bg-surface) 0%, var(--color-bg-elevated) 100%);
+}
+
+/* ── Keyframes for entrance animations ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-fade-in-up { animation: fadeInUp var(--duration-normal) var(--spring-smooth) forwards; }
+.animate-fade-in-scale { animation: fadeInScale var(--duration-normal) var(--spring-smooth) forwards; }
+.animate-slide-in-left { animation: slideInLeft var(--duration-normal) var(--spring-smooth) forwards; }
+
+/* Stagger children */
+.stagger > * { opacity: 0; animation: fadeInUp var(--duration-normal) var(--spring-smooth) forwards; }
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 50ms; }
+.stagger > *:nth-child(3) { animation-delay: 100ms; }
+.stagger > *:nth-child(4) { animation-delay: 150ms; }
+.stagger > *:nth-child(5) { animation-delay: 200ms; }
+.stagger > *:nth-child(6) { animation-delay: 250ms; }
