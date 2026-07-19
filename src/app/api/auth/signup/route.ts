@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 /**
  * 邮箱密码注册 API
+ * 注册后跳转到付费墙（Stripe Checkout）
  */
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -33,14 +34,11 @@ export async function POST(request: Request) {
 
   if (error) {
     return NextResponse.redirect(
-      new URL(
-        `/signup?error=${encodeURIComponent(error.message)}`,
-        request.url
-      ),
+      new URL(`/signup?error=${encodeURIComponent(error.message)}`, request.url),
       303
     );
   }
 
-  // 注册成功 → 跳转 dashboard
-  return NextResponse.redirect(new URL("/dashboard", request.url), 303);
+  // 注册成功 → 跳转到付费墙
+  return NextResponse.redirect(new URL(`/subscribe?plan=${plan}`, request.url), 303);
 }
