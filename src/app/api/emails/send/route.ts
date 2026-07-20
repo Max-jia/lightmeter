@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { sendEmail } from "@/lib/gmail/client";
+import { sendEmail, getValidAccessToken } from "@/lib/gmail/client";
 import { NextResponse } from "next/server";
 
 /**
@@ -21,13 +21,15 @@ export async function POST(request: Request) {
   // 获取 Gmail token
   const { data: tokenRow } = await supabase
     .from("gmail_tokens")
-    .select("access_token")
+    .select("access_token, refresh_token")
     .eq("user_id", userData.user.id)
     .single();
 
   if (!tokenRow?.access_token) {
     return NextResponse.json({ error: "Gmail not connected" }, { status: 400 });
   }
+
+  const validToken = await getValidAccessToken(tokenRow.access_token, tokenRow.refresh_token, userData.user.id);
 
   // 获取原始邮件
   const { data: email } = await supabase
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
     const to = toMatch[1] || email.from_address;
 
     // 发送
-    await sendEmail(tokenRow.access_token, to, subject, body);
+    await sendEmail(validToken, to, subject, body);
 
     // 更新状态
     await supabase

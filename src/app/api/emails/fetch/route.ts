@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { fetchRecentEmails } from "@/lib/gmail/client";
+import { fetchRecentEmails, getValidAccessToken } from "@/lib/gmail/client";
 import { classifyEmail, extractClientInfo, generateReply } from "@/lib/ai/deepseek";
 import { NextResponse } from "next/server";
 
@@ -16,13 +16,20 @@ export async function GET() {
 
   const { data: tokenRow } = await supabase
     .from("gmail_tokens")
-    .select("access_token")
+    .select("access_token, refresh_token")
     .eq("user_id", userData.user.id)
     .single();
 
   if (!tokenRow?.access_token) {
     return NextResponse.json({ error: "Gmail not connected" }, { status: 400 });
   }
+
+  // 自动刷新过期的 token
+  const validToken = await getValidAccessToken(
+    tokenRow.access_token,
+    tokenRow.refresh_token,
+    userData.user.id
+  );
 
   // 获取用户偏好
   const { data: profile } = await supabase
@@ -36,7 +43,7 @@ export async function GET() {
   const studioName = profile?.studio_name || "My Studio";
 
   try {
-    const emails = await fetchRecentEmails(tokenRow.access_token, 20);
+    const emails = await fetchRecentEmails(validToken, 20);
 
     let newCount = 0;
     let processedCount = 0;

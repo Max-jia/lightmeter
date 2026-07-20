@@ -1,13 +1,62 @@
 import { google } from "googleapis";
 
 /**
- * Gmail API 客户端
- * 使用 OAuth 2.0 访问用户的 Gmail
+ * 自动刷新 Gmail access token
+ * 调用 Gmail API 前先检查 token 是否过期，过期则用 refresh_token 换新的
  */
+export async function getValidAccessToken(
+  accessToken: string,
+  refreshToken: string | null,
+  userId: string
+): Promise<string> {
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID!,
+    process.env.GOOGLE_CLIENT_SECRET!
+  );
+
+  oauth2Client.setCredentials({
+    access_token: accessToken,
+    refresh_token: refreshToken || undefined,
+  });
+
+  // 检查 token 是否过期
+  const expiryDate = oauth2Client.credentials.expiry_date;
+  if (!expiryDate || Date.now() >= expiryDate - 60000) {
+    // Token 已过期或即将过期 → 刷新
+    if (!refreshToken) {
+      throw new Error("No refresh token available. Please reconnect Gmail.");
+    }
+
+    try {
+      const { credentials } = await oauth2Client.refreshAccessToken();
+      const newAccessToken = credentials.access_token!;
+      const newExpiry = credentials.expiry_date!;
+
+      // 更新数据库中的 token
+      const { createClient } = await import("@/lib/supabase/server");
+      const supabase = await createClient();
+      await supabase
+        .from("gmail_tokens")
+        .update({
+          access_token: newAccessToken,
+          expires_at: new Date(newExpiry).toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", userId);
+
+      return newAccessToken;
+    } catch (err) {
+      console.error("Token refresh failed:", err);
+      throw new Error("Gmail token refresh failed. Please reconnect Gmail.");
+    }
+  }
+
+  return accessToken;
+}
+
 export function createGmailClient(accessToken: string) {
   const oauth2Client = new google.auth.OAuth2();
   oauth2Client.setCredentials({ access_token: accessToken });
-
   return google.gmail({ version: "v1", auth: oauth2Client });
 }
 
@@ -39,12 +88,9 @@ export async function fetchRecentEmails(accessToken: string, maxResults = 20) {
     const from = headers.find((h) => h.name === "From")?.value || "";
     const date = headers.find((h) => h.name === "Date")?.value || "";
 
-    // 获取邮件正文
     let body = "";
     if (detail.data.payload?.body?.data) {
-      body = Buffer.from(detail.data.payload.body.data, "base64").toString(
-        "utf-8"
-      );
+      body = Buffer.from(detail.data.payload.body.data, "base64").toString("utf-8");
     } else if (detail.data.payload?.parts) {
       for (const part of detail.data.payload.parts) {
         if (part.mimeType === "text/plain" && part.body?.data) {
@@ -60,7 +106,7 @@ export async function fetchRecentEmails(accessToken: string, maxResults = 20) {
       subject,
       from,
       date,
-      body: body.slice(0, 5000), // 限制长度
+      body: body.slice(0, 5000),
       snippet: detail.data.snippet || "",
     });
   }
@@ -91,9 +137,7 @@ export async function sendEmail(
 
   const response = await gmail.users.messages.send({
     userId: "me",
-    requestBody: {
-      raw: encoded,
-    },
+    requestBody: { raw: encoded },
   });
 
   return response.data;
