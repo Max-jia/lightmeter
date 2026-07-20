@@ -21,7 +21,8 @@ export async function GET(request: Request) {
 
   try {
     // 用 code 换 token
-    const redirectUri = `${new URL(request.url).origin}/api/gmail/callback`;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+    const redirectUri = `${baseUrl}/api/gmail/callback`;
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },

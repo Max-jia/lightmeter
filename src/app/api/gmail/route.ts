@@ -12,7 +12,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const redirectUri = `${new URL(request.url).origin}/api/gmail/callback`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+  const redirectUri = `${baseUrl}/api/gmail/callback`;
   const scopes = [
     "https://www.googleapis.com/auth/gmail.readonly",
     "https://www.googleapis.com/auth/gmail.send",
