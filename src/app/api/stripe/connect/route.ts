@@ -7,13 +7,14 @@ import { NextResponse } from "next/server";
  * 为摄影师创建 Stripe Connect 入驻链接
  */
 export async function GET(request: Request) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    // 未登录 → 跳到登录页
+    return NextResponse.redirect(new URL("/login", baseUrl), 303);
   }
-
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
 
   try {
     // 检查是否已有 connected account

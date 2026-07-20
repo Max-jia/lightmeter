@@ -1,19 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { User, Mail, CreditCard, Globe } from "lucide-react";
+import { User, CreditCard, Globe } from "lucide-react";
 import { useApi } from "@/hooks/use-api";
 import toast from "react-hot-toast";
 
 export default function SettingsPage() {
+  const searchParams = useSearchParams();
   const { call, loading } = useApi<any>();
   const [tone, setTone] = useState("professional");
   const [studioName, setStudioName] = useState("");
   const [fullName, setFullName] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // 显示 Stripe Connect 结果
+  useEffect(() => {
+    const connectError = searchParams.get("connect_error");
+    const connectSuccess = searchParams.get("connect");
+    if (connectError) toast.error(decodeURIComponent(connectError));
+    if (connectSuccess) toast.success("Stripe account connected!");
+  }, []);
 
   // 加载当前设置
   useEffect(() => {
