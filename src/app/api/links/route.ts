@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { clientName, amount, description } = body;
+  const { clientName, amount, description, contractTemplate } = body;
 
   if (!clientName || !amount) {
     return NextResponse.json({ error: "Client name and amount are required" }, { status: 400 });
@@ -43,6 +43,7 @@ export async function POST(request: Request) {
       proposal_title: description || `${clientName} — Photography Services`,
       proposal_amount: amount,
       proposal_description: description,
+      contract_template: contractTemplate || null,
       status: "pending",
     })
     .select("id, slug, proposal_title, proposal_amount, status")

@@ -17,6 +17,7 @@ export default function LinksPage() {
   const [clientName, setClientName] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
+  const [contractTemplate, setContractTemplate] = useState("");
 
   useEffect(() => {
     loadLinks();
@@ -43,8 +44,9 @@ export default function LinksPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientName,
-          amount: Math.round(parseFloat(amount) * 100), // 转美分
+          amount: Math.round(parseFloat(amount) * 100),
           description: description || `${clientName} — Photography Services`,
+          contractTemplate: contractTemplate || undefined,
         }),
       });
       const data = await res.json();
@@ -56,6 +58,7 @@ export default function LinksPage() {
         setClientName("");
         setAmount("");
         setDescription("");
+        setContractTemplate("");
         loadLinks();
       }
     } catch {
@@ -137,6 +140,16 @@ export default function LinksPage() {
             <Input label="Client name" value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Sarah Johnson" />
             <Input label="Amount (USD)" prefix="$" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="500" helperText="Total proposal amount" />
             <Input label="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Wedding Photography Package" />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-[var(--color-text-secondary)]">Contract (optional)</label>
+              <textarea
+                className="w-full h-24 p-3 text-sm rounded-xl border bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] border-[var(--color-border-default)] placeholder:text-[var(--color-text-disabled)] focus:outline-none focus:border-[var(--color-gold)] resize-none"
+                value={contractTemplate}
+                onChange={(e) => setContractTemplate(e.target.value)}
+                placeholder={`Photography Services Agreement&#10;&#10;1. Coverage: 8 hours of wedding photography&#10;2. Delivery: 500+ edited images within 4 weeks&#10;3. Deposit: 50% due upon signing&#10;4. Cancellation: 30 days notice required`}
+              />
+              <p className="text-xs text-[var(--color-text-disabled)]">Client will sign this before paying.</p>
+            </div>
             <Button variant="gold" className="w-full" loading={creating} onClick={handleCreate}>
               Create link
             </Button>
