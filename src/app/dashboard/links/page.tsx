@@ -21,9 +21,13 @@ export default function LinksPage() {
   const [contractTemplate, setContractTemplate] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [showContractPreview, setShowContractPreview] = useState(false);
+  const [studioName, setStudioName] = useState("My Photo Studio");
 
   useEffect(() => {
     loadLinks();
+    fetch("/api/profile").then(r => r.json()).then(d => {
+      if (d.studio_name) setStudioName(d.studio_name);
+    });
   }, []);
 
   const loadLinks = () => {
@@ -157,6 +161,7 @@ export default function LinksPage() {
                       setSelectedTemplate(tpl.id);
                       const rendered = renderContract(tpl.content, {
                         client_name: clientName || "[Client Name]",
+                        studio_name: studioName,
                         amount: amount ? `$${amount}` : "[Amount]",
                         deposit: amount ? `$${(parseFloat(amount) / 2).toFixed(0)}` : "[Deposit]",
                       });
