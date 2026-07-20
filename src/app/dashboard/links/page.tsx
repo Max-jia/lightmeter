@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LinkIcon, Copy, ExternalLink, Plus, X } from "lucide-react";
+import { LinkIcon, Copy, ExternalLink, Plus, X, FileText } from "lucide-react";
 import toast from "react-hot-toast";
+import { CONTRACT_TEMPLATES, renderContract } from "@/lib/contracts/templates";
 
 export default function LinksPage() {
   const [links, setLinks] = useState<any[]>([]);
@@ -18,6 +19,8 @@ export default function LinksPage() {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [contractTemplate, setContractTemplate] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [showContractPreview, setShowContractPreview] = useState(false);
 
   useEffect(() => {
     loadLinks();
@@ -59,6 +62,8 @@ export default function LinksPage() {
         setAmount("");
         setDescription("");
         setContractTemplate("");
+        setSelectedTemplate("");
+        setShowContractPreview(false);
         loadLinks();
       }
     } catch {
@@ -142,13 +147,48 @@ export default function LinksPage() {
             <Input label="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Wedding Photography Package" />
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-[var(--color-text-secondary)]">Contract (optional)</label>
-              <textarea
-                className="w-full h-24 p-3 text-sm rounded-xl border bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] border-[var(--color-border-default)] placeholder:text-[var(--color-text-disabled)] focus:outline-none focus:border-[var(--color-gold)] resize-none"
-                value={contractTemplate}
-                onChange={(e) => setContractTemplate(e.target.value)}
-                placeholder={`Photography Services Agreement&#10;&#10;1. Coverage: 8 hours of wedding photography&#10;2. Delivery: 500+ edited images within 4 weeks&#10;3. Deposit: 50% due upon signing&#10;4. Cancellation: 30 days notice required`}
-              />
-              <p className="text-xs text-[var(--color-text-disabled)]">Client will sign this before paying.</p>
+              {/* 模板选择 */}
+              <div className="grid grid-cols-3 gap-2">
+                {CONTRACT_TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedTemplate(tpl.id);
+                      const rendered = renderContract(tpl.content, {
+                        client_name: clientName || "[Client Name]",
+                        amount: amount ? `$${amount}` : "[Amount]",
+                        deposit: amount ? `$${(parseFloat(amount) / 2).toFixed(0)}` : "[Deposit]",
+                      });
+                      setContractTemplate(rendered);
+                      setShowContractPreview(true);
+                    }}
+                    className={`p-2 rounded-xl border text-xs text-left transition-all ${
+                      selectedTemplate === tpl.id
+                        ? "bg-[var(--color-gold-subtle)] border-[var(--color-gold)] text-[var(--color-gold)]"
+                        : "bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-default)]"
+                    }`}
+                  >
+                    <FileText className="w-4 h-4 mb-1" />
+                    <span className="font-medium block">{tpl.name}</span>
+                    <span className="text-[10px] opacity-70">{tpl.description}</span>
+                  </button>
+                ))}
+              </div>
+              {/* 合同预览/编辑 */}
+              {showContractPreview && (
+                <div className="relative mt-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-[var(--color-text-disabled)]">Preview — client will sign this before paying</span>
+                    <button type="button" className="text-xs text-[var(--color-gold)]" onClick={() => { setShowContractPreview(false); setSelectedTemplate(""); setContractTemplate(""); }}>
+                      Remove
+                    </button>
+                  </div>
+                  <div className="max-h-32 overflow-y-auto p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-xs text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap">
+                    {contractTemplate}
+                  </div>
+                </div>
+              )}
             </div>
             <Button variant="gold" className="w-full" loading={creating} onClick={handleCreate}>
               Create link
