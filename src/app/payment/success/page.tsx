@@ -15,12 +15,6 @@ export default function PaymentSuccessPage() {
 }
 
 function SuccessContent() {
-
-/**
- * 支付成功页面
- * 服务端处理数据更新，客户端展示结果
- */
-export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -32,8 +26,6 @@ export default function PaymentSuccessPage() {
       setMessage("No payment session found.");
       return;
     }
-
-    // 调用 API 完成支付数据入库
     fetch("/api/stripe/fulfill", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -64,7 +56,6 @@ export default function PaymentSuccessPage() {
             <h1 className="text-xl font-heading font-semibold">{message}</h1>
           </>
         )}
-
         {status === "success" && (
           <>
             <div className="w-16 h-16 mx-auto rounded-full bg-green-950/50 border border-green-800/50 flex items-center justify-center">
@@ -76,7 +67,6 @@ export default function PaymentSuccessPage() {
             </div>
           </>
         )}
-
         {status === "error" && (
           <>
             <div className="w-16 h-16 mx-auto rounded-full bg-red-950/50 border border-red-800/50 flex items-center justify-center">
