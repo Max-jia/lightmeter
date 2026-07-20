@@ -197,9 +197,7 @@ function PayoutSection() {
           <p className="text-sm text-amber-400 font-medium">Setup incomplete</p>
           <p className="text-xs text-[var(--color-text-secondary)]">Complete your Stripe onboarding to receive payments.</p>
         </div>
-        <a href="/api/stripe/connect">
-          <Button variant="gold" size="sm">Complete setup</Button>
-        </a>
+        <Button variant="gold" size="sm" onClick={() => window.location.href = "/api/stripe/connect"}>Complete setup</Button>
       </div>
     );
   }
@@ -210,9 +208,7 @@ function PayoutSection() {
         <p className="text-sm text-[var(--color-text-secondary)]">Not set up yet</p>
         <p className="text-xs text-[var(--color-text-disabled)]">Connect Stripe to receive payments directly to your bank.</p>
       </div>
-      <a href="/api/stripe/connect">
-        <Button variant="gold" size="sm">Set up payouts</Button>
-      </a>
+      <Button variant="gold" size="sm" onClick={() => window.location.href = "/api/stripe/connect"}>Set up payouts</Button>
     </div>
   );
 }
