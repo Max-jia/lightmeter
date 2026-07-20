@@ -118,11 +118,20 @@ export default function SettingsPage() {
         </div>
       </Card>
 
+      {/* Stripe Connect — 收款设置 */}
+      <Card padding="lg">
+        <div className="flex items-center gap-2 mb-4">
+          <CreditCard className="w-4 h-4 text-[var(--color-text-secondary)]" />
+          <h2 className="text-sm font-heading font-semibold">Payouts</h2>
+        </div>
+        <PayoutSection />
+      </Card>
+
       {/* Billing */}
       <Card padding="lg">
         <div className="flex items-center gap-2 mb-4">
           <CreditCard className="w-4 h-4 text-[var(--color-text-secondary)]" />
-          <h2 className="text-sm font-heading font-semibold">Billing</h2>
+          <h2 className="text-sm font-heading font-semibold">Subscription</h2>
         </div>
         <div className="flex items-center justify-between">
           <div>
@@ -148,6 +157,62 @@ export default function SettingsPage() {
           </Button>
         </div>
       </Card>
+    </div>
+  );
+}
+
+/** Stripe Connect 收款设置组件 */
+function PayoutSection() {
+  const [status, setStatus] = useState<{ connected?: boolean; charges_enabled?: boolean } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/stripe/connect/status")
+      .then((r) => r.json())
+      .then((d) => {
+        setStatus(d);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div className="h-8 animate-shimmer rounded-lg bg-[var(--color-bg-elevated)]" />;
+  }
+
+  if (status?.charges_enabled) {
+    return (
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-green-400 font-medium">✓ Connected</p>
+          <p className="text-xs text-[var(--color-text-secondary)]">Payments go directly to your bank account.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status?.connected) {
+    return (
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-amber-400 font-medium">Setup incomplete</p>
+          <p className="text-xs text-[var(--color-text-secondary)]">Complete your Stripe onboarding to receive payments.</p>
+        </div>
+        <a href="/api/stripe/connect">
+          <Button variant="gold" size="sm">Complete setup</Button>
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-sm text-[var(--color-text-secondary)]">Not set up yet</p>
+        <p className="text-xs text-[var(--color-text-disabled)]">Connect Stripe to receive payments directly to your bank.</p>
+      </div>
+      <a href="/api/stripe/connect">
+        <Button variant="gold" size="sm">Set up payouts</Button>
+      </a>
     </div>
   );
 }
