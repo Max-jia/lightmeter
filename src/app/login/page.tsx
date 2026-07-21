@@ -1,18 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabase/client";
+import { Suspense } from "react";
 
 export default function LoginPage() {
-  const router = useRouter();
+  return <Suspense><LoginForm /></Suspense>;
+}
+
+function LoginForm() {
+  const params = useSearchParams();
+  const serverError = params.get("error") || "";
+  const serverInfo = params.get("info") || "";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(serverError);
 
   const friendlyError = (msg: string) => {
     if (msg.includes("Invalid login") || msg.includes("invalid_credentials")) return "Invalid email or password.";
@@ -21,14 +27,13 @@ export default function LoginPage() {
     return msg;
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !password.trim()) { setError("Please enter both email and password."); return; }
-    setLoading(true); setError("");
-    const supabase = createClient();
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-    if (err) { setError(friendlyError(err.message)); setLoading(false); }
-    else { router.push("/dashboard"); }
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    if (!email.trim() || !password.trim()) {
+      e.preventDefault();
+      setError("Please enter both email and password.");
+      return;
+    }
+    setLoading(true);
   };
 
   return (
@@ -38,10 +43,12 @@ export default function LoginPage() {
           <h1 className="text-2xl font-heading font-semibold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>Lightmeter</h1>
           <p className="text-sm text-[var(--color-text-secondary)]">AI CRM for photographers</p>
         </div>
-        {error && <div className="p-3 rounded-xl bg-[var(--color-error-bg)] border border-[var(--color-error)]/20 text-sm text-[var(--color-error)] text-center">{error}</div>}
-        <form className="space-y-4" onSubmit={handleLogin}>
-          <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
-          <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+        {serverInfo && <div className="p-3 rounded-xl bg-[var(--color-accent-bg)] border border-[var(--color-accent)]/20 text-sm text-[var(--color-text-secondary)] text-center">{serverInfo}</div>}
+        {error && !serverError && <div className="p-3 rounded-xl bg-[var(--color-error-bg)] border border-[var(--color-error)]/20 text-sm text-[var(--color-error)] text-center">{error}</div>}
+        {serverError && <div className="p-3 rounded-xl bg-[var(--color-error-bg)] border border-[var(--color-error)]/20 text-sm text-[var(--color-error)] text-center">{friendlyError(serverError)}</div>}
+        <form className="space-y-4" action="/api/auth/login" method="POST" onSubmit={handleSubmit}>
+          <Input label="Email" type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+          <Input label="Password" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
           <Button type="submit" className="w-full" size="lg" loading={loading}>Sign in</Button>
         </form>
         <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--color-border-subtle)]" /></div><div className="relative flex justify-center text-xs"><span className="bg-[var(--color-bg-base)] px-2 text-[var(--color-text-disabled)]">or</span></div></div>

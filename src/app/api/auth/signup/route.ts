@@ -21,11 +21,16 @@ export async function POST(request: Request) {
     options: { data: { full_name: name, plan, trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() } },
   });
 
-  if (signUpError && !signUpError.message?.includes("already registered") && signUpError.status !== 422) {
+  if (signUpError) {
+    // 邮箱已注册 → 友好地引导用户去登录
+    if (signUpError.message?.includes("already registered") || signUpError.status === 422) {
+      return NextResponse.redirect(new URL(`/login?info=${encodeURIComponent("This email is already registered. Please sign in.")}`, request.url), 303);
+    }
+    // 其他错误 → 带回注册页显示
     return NextResponse.redirect(new URL(`/signup?error=${encodeURIComponent(signUpError.message)}`, request.url), 303);
   }
 
-  // 登录
+  // 注册成功，自动登入
   const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
   if (signInError) {
     return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(signInError.message)}`, request.url), 303);
