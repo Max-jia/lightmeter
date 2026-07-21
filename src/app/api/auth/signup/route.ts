@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -12,9 +12,30 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
   }
 
-  const supabase = await createClient();
+  // 用能写 cookie 的 supabase client
+  const supabaseResponse = NextResponse.redirect(new URL("/dashboard", request.url), 303);
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => {
+          const cookiePairs = request.headers.get("cookie")?.split("; ") || [];
+          return cookiePairs.map((pair) => {
+            const [name, ...rest] = pair.split("=");
+            return { name, value: rest.join("=") };
+          });
+        },
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            supabaseResponse.cookies.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
 
-  // 注册用户
+  // 先注册
   const { error: signUpError } = await supabase.auth.signUp({
     email,
     password,
@@ -27,25 +48,22 @@ export async function POST(request: Request) {
     },
   });
 
-  if (signUpError) {
-    // 已注册 → 直接登录
-    if (signUpError.message?.includes("already registered") || signUpError.status === 422) {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (!signInError) {
-        return NextResponse.redirect(new URL("/dashboard", request.url), 303);
-      }
-    }
+  // 如果已注册，忽略错误继续登录
+  if (signUpError && !signUpError.message?.includes("already registered") && signUpError.status !== 422) {
     return NextResponse.redirect(
       new URL(`/signup?error=${encodeURIComponent(signUpError.message)}`, request.url),
       303
     );
   }
 
-  // 注册成功后立即登录
+  // 登录 → session cookie 写入 supabaseResponse
   const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
   if (signInError) {
-    return NextResponse.redirect(new URL("/dashboard", request.url), 303);
+    return NextResponse.redirect(
+      new URL(`/login?error=${encodeURIComponent(signInError.message)}`, request.url),
+      303
+    );
   }
 
-  return NextResponse.redirect(new URL("/dashboard", request.url), 303);
+  return supabaseResponse;
 }

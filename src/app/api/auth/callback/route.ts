@@ -1,32 +1,43 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
-/**
- * Supabase OAuth 回调
- * Google 授权后 Supabase 跳回这里，我们交换 code 换 session
- */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
 
   if (!code) {
-    return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent("No authorization code received")}`, baseUrl),
-      303
-    );
+    return NextResponse.redirect(new URL(`/login?error=no_code`, baseUrl), 303);
   }
 
+  const supabaseResponse = NextResponse.redirect(new URL("/dashboard", baseUrl), 303);
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => {
+          const cookiePairs = request.headers.get("cookie")?.split("; ") || [];
+          return cookiePairs.map((pair) => {
+            const [name, ...rest] = pair.split("=");
+            return { name, value: rest.join("=") };
+          });
+        },
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            supabaseResponse.cookies.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
+
   try {
-    const supabase = await createClient();
     await supabase.auth.exchangeCodeForSession(code);
   } catch (err: any) {
     console.error("OAuth callback error:", err);
-    return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(err.message)}`, baseUrl),
-      303
-    );
+    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(err.message)}`, baseUrl), 303);
   }
 
-  return NextResponse.redirect(new URL("/dashboard", baseUrl), 303);
+  return supabaseResponse;
 }
