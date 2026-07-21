@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("error");
+    const msg = params.get("info");
+    if (err) setError(friendlyError(err));
+    if (msg) setInfo(msg);
+  }, []);
 
   const friendlyError = (msg: string) => {
     if (msg.includes("Invalid login") || msg.includes("invalid_credentials")) return "Invalid email or password.";
@@ -34,6 +43,7 @@ export default function LoginPage() {
           <h1 className="text-2xl font-heading font-semibold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>Lightmeter</h1>
           <p className="text-sm text-[var(--color-text-secondary)]">AI CRM for photographers</p>
         </div>
+        {info && <div className="p-3 rounded-xl bg-[var(--color-gold-subtle)] border border-[var(--color-gold)]/20 text-sm text-[var(--color-text-secondary)] text-center">{info}</div>}
         {error && <div className="p-3 rounded-xl bg-[var(--color-error-bg)] border border-[var(--color-error)]/20 text-sm text-[var(--color-error)] text-center">{error}</div>}
         <form className="space-y-4" action="/api/auth/login" method="POST" onSubmit={handleSubmit}>
           <Input label="Email" type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />

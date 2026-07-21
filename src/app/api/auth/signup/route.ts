@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const { supabase, responseCookies } = await createClient(true);
 
   // 注册
-  const { error: signUpError } = await supabase.auth.signUp({
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: { data: { full_name: name, plan, trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() } },
@@ -30,12 +30,12 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL(`/signup?error=${encodeURIComponent(signUpError.message)}`, request.url), 303);
   }
 
-  // 注册成功，自动登入
-  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-  if (signInError) {
-    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(signInError.message)}`, request.url), 303);
+  // 如果 Supabase 开启了邮箱验证，session 为空 → 提醒用户查收邮件
+  if (!signUpData.session) {
+    return NextResponse.redirect(new URL(`/login?info=${encodeURIComponent("Account created! Please check your email to confirm your address, then sign in.")}`, request.url), 303);
   }
 
+  // 无需邮箱验证，session 已有 → 写 cookie 直接登入
   const res = NextResponse.redirect(new URL("/dashboard", request.url), 303);
   responseCookies.forEach((c: { name: string; value: string; options: Record<string, any> }) => res.cookies.set(c.name, c.value, c.options));
   return res;
