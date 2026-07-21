@@ -39,6 +39,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // 注册成功 → 跳转到付费墙
-  return NextResponse.redirect(new URL(`/subscribe?plan=${plan}`, request.url), 303);
+  // 注册成功 → 直接进 Dashboard（14天免费试用）
+  return NextResponse.redirect(new URL("/dashboard", request.url), 303);
 }
