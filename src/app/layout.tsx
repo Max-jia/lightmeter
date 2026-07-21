@@ -3,18 +3,21 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
-  title: "Darkroom — AI CRM for Photographers",
+  title: "Lightmeter — AI CRM for Photographers",
   description:
     "The AI-native CRM for photographers. Auto-reply to inquiries, send proposals, contracts, and get paid — all from one link.",
   keywords: ["photographer crm", "wedding photographer", "ai crm", "client management"],
   manifest: "/manifest.json",
+  verification: {
+    google: "21B3_bV-L1vFlAInF3AuX1XE2PjJdSfaRxEvrax4X8g",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black",
-    title: "Darkroom",
+    title: "Lightmeter",
   },
   openGraph: {
-    title: "Darkroom — AI CRM for Photographers",
+    title: "Lightmeter — AI CRM for Photographers",
     description: "Your clients, on autopilot.",
     type: "website",
   },
