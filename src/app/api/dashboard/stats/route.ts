@@ -30,7 +30,7 @@ export async function GET() {
     supabase.from("profiles").select("plan, trial_ends_at").eq("id", userId).single(),
   ]);
 
-  const activeClients = clientsResult.data?.filter((c) => c.status === "active").length || 0;
+  const activeClients = clientsResult.data?.filter((c: any) => c.status === "active").length || 0;
   const totalClients = clientsResult.data?.length || 0;
   const draftsReady = emailsResult.data?.length || 0;
 
@@ -39,12 +39,12 @@ export async function GET() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const monthlyRevenue =
     paymentsResult.data
-      ?.filter((p) => p.paid_at && p.paid_at >= monthStart)
-      .reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+      ?.filter((p: any) => p.paid_at && p.paid_at >= monthStart)
+      .reduce((sum: number, p: any) => sum + (p.amount || 0), 0) || 0;
 
   // 本月咨询数
   const monthlyInquiries =
-    emailsResult.data?.filter((e) => e.received_at && e.received_at >= monthStart).length || 0;
+    emailsResult.data?.filter((e: any) => e.received_at && e.received_at >= monthStart).length || 0;
 
   return NextResponse.json({
     monthlyRevenue: `$${(monthlyRevenue / 100).toLocaleString()}`,
