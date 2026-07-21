@@ -158,11 +158,12 @@ body {
   box-shadow: var(--elevation-2);
   border-color: var(--color-border-default);
   transform: translateY(-2px);
+  filter: brightness(1.05);
 }
 .card-depth:active {
-  transform: scale(0.985) translateY(0);
+  transform: scale(0.98);
   box-shadow: var(--elevation-1);
-  transition-duration: var(--duration-exit);
+  filter: brightness(1);
 }
 
 /* ── Interactive card (clickable cards — Apple feel) ── */

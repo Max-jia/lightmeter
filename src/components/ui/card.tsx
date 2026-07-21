@@ -48,9 +48,9 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
           // 金色边框
           goldBorder && "!border-[var(--color-gold)]/30",
           // 悬停效果
-          "transition-all duration-[var(--duration-normal)] ease-[var(--spring-ios)]",
-          "hover:-translate-y-0.5 hover:shadow-[var(--elevation-2)] hover:border-[var(--color-border-default)]",
-          "active:scale-[0.985] active:shadow-[var(--elevation-1)]",
+          "transition-all duration-300 ease-[var(--spring-ios)]",
+          "hover:-translate-y-1 hover:shadow-[var(--elevation-2)] hover:border-[var(--color-border-default)] hover:brightness-105",
+          "active:scale-[0.98] active:shadow-[var(--elevation-1)] active:brightness-100",
           goldBorder && "hover:!border-[var(--color-gold)]/50",
           paddingClasses[padding],
           className
