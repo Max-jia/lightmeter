@@ -59,13 +59,16 @@
   --radius-2xl: 24px;
   --radius-full: 9999px;
 
-  /* ── Spring animation tokens ── */
+  /* ── Spring animation tokens (Apple-style physics) ── */
   --spring-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
   --spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);
   --spring-snappy: cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  --spring-ios: cubic-bezier(0.17, 0.17, 0.32, 1.05);      /* Apple iOS spring */
+  --spring-ios-strong: cubic-bezier(0.17, 0.17, 0.15, 1.15); /* Stronger Apple bounce */
   --duration-fast: 150ms;
   --duration-normal: 250ms;
   --duration-slow: 400ms;
+  --duration-exit: 120ms;    /* Exit faster than enter (Apple HIG) */
 }
 
 @theme inline {
@@ -127,37 +130,57 @@ body {
 .shadow-3 { box-shadow: var(--elevation-3); }
 .shadow-4 { box-shadow: var(--elevation-4); }
 
-/* ── Spring press interaction ── */
+/* ── Spring press interaction (Apple-style button feel) ── */
 .spring-press {
-  transition: transform var(--duration-fast) var(--spring-bouncy),
-              box-shadow var(--duration-fast) var(--spring-smooth);
+  transition: transform var(--duration-fast) var(--spring-ios),
+              box-shadow var(--duration-fast) var(--spring-smooth),
+              opacity var(--duration-fast) var(--spring-smooth);
 }
 .spring-press:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 .spring-press:hover {
   transform: scale(1.01);
   box-shadow: var(--elevation-2);
 }
 
-/* ── Card with depth ── */
+/* ── Card with Apple depth ── */
 .card-depth {
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-xl);
   box-shadow: var(--elevation-1);
-  transition: box-shadow var(--duration-normal) var(--spring-smooth),
-              transform var(--duration-normal) var(--spring-smooth),
+  transition: box-shadow var(--duration-normal) var(--spring-ios),
+              transform var(--duration-normal) var(--spring-ios),
               border-color var(--duration-normal) var(--spring-smooth);
 }
 .card-depth:hover {
   box-shadow: var(--elevation-2);
   border-color: var(--color-border-default);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 .card-depth:active {
-  transform: scale(0.98);
+  transform: scale(0.985) translateY(0);
   box-shadow: var(--elevation-1);
+  transition-duration: var(--duration-exit);
+}
+
+/* ── Interactive card (clickable cards — Apple feel) ── */
+.interactive-card {
+  transition: transform var(--duration-fast) var(--spring-ios),
+              box-shadow var(--duration-normal) var(--spring-ios),
+              border-color var(--duration-normal) var(--spring-smooth);
+  cursor: pointer;
+}
+.interactive-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-2);
+  border-color: var(--color-border-default);
+}
+.interactive-card:active {
+  transform: scale(0.97);
+  box-shadow: var(--elevation-1);
+  transition-duration: var(--duration-exit);
 }
 
 /* ── Gold accent glow (for CTA, selected states) ── */
@@ -208,15 +231,29 @@ body {
   from { opacity: 0; transform: translateX(-16px); }
   to { opacity: 1; transform: translateX(0); }
 }
-.animate-fade-in-up { animation: fadeInUp var(--duration-normal) var(--spring-smooth) forwards; }
-.animate-fade-in-scale { animation: fadeInScale var(--duration-normal) var(--spring-smooth) forwards; }
-.animate-slide-in-left { animation: slideInLeft var(--duration-normal) var(--spring-smooth) forwards; }
+.animate-fade-in-up { animation: fadeInUp var(--duration-normal) var(--spring-ios) forwards; }
+.animate-fade-in-scale { animation: fadeInScale var(--duration-normal) var(--spring-ios) forwards; }
+.animate-slide-in-left { animation: slideInLeft var(--duration-normal) var(--spring-ios) forwards; }
 
-/* Stagger children */
-.stagger > * { opacity: 0; animation: fadeInUp var(--duration-normal) var(--spring-smooth) forwards; }
+/* Stagger children — Apple-style cascading entrance */
+.stagger > * { opacity: 0; animation: fadeInUp var(--duration-normal) var(--spring-ios) forwards; }
 .stagger > *:nth-child(1) { animation-delay: 0ms; }
-.stagger > *:nth-child(2) { animation-delay: 50ms; }
-.stagger > *:nth-child(3) { animation-delay: 100ms; }
-.stagger > *:nth-child(4) { animation-delay: 150ms; }
-.stagger > *:nth-child(5) { animation-delay: 200ms; }
-.stagger > *:nth-child(6) { animation-delay: 250ms; }
+.stagger > *:nth-child(2) { animation-delay: 40ms; }
+.stagger > *:nth-child(3) { animation-delay: 80ms; }
+.stagger > *:nth-child(4) { animation-delay: 120ms; }
+.stagger > *:nth-child(5) { animation-delay: 160ms; }
+.stagger > *:nth-child(6) { animation-delay: 200ms; }
+.stagger > *:nth-child(7) { animation-delay: 240ms; }
+.stagger > *:nth-child(8) { animation-delay: 280ms; }
+
+/* ── Reduced motion (Apple HIG: respect accessibility) ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .stagger > * { opacity: 1; animation: none; }
+}

@@ -124,7 +124,7 @@ export default async function DashboardHome() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger">
         <StatCard label="Monthly Revenue" value={stats?.monthlyRevenue || "$0"} icon={DollarSign} />
         <StatCard label="Total Clients" value={String(stats?.totalClients || 0)} icon={Users} />
         <StatCard label="Active Leads" value={String(stats?.activeClients || 0)} icon={Mail} />

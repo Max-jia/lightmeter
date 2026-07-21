@@ -76,7 +76,7 @@ export function StatCard({
   const TrendIcon = isPositive ? TrendingUp : TrendingDown;
 
   return (
-    <div className="p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)] shadow-[var(--elevation-1)]">
+    <div className="p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)] shadow-[var(--elevation-1)] transition-all duration-[var(--duration-normal)] ease-[var(--spring-ios)] hover:-translate-y-0.5 hover:shadow-[var(--elevation-2)]">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">
           {label}

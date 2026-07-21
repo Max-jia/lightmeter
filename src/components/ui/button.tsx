@@ -14,14 +14,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-[var(--color-text-primary)] text-[var(--color-bg-base)] hover:bg-[#E8E3DD] active:scale-[0.97] shadow-[var(--elevation-1)] hover:shadow-[var(--elevation-2)]",
+    "bg-[var(--color-text-primary)] text-[var(--color-bg-base)] hover:bg-[#E8E3DD] hover:-translate-y-px active:scale-[0.96] shadow-[var(--elevation-1)] hover:shadow-[var(--elevation-2)]",
   secondary:
-    "bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] border border-[var(--color-border-default)] hover:bg-[var(--color-bg-overlay)] active:scale-[0.97]",
+    "bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] border border-[var(--color-border-default)] hover:bg-[var(--color-bg-overlay)] hover:-translate-y-px active:scale-[0.96]",
   ghost:
-    "bg-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-surface)] active:scale-[0.97]",
+    "bg-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-surface)] hover:-translate-y-px active:scale-[0.96]",
   danger:
-    "bg-[var(--color-error)] text-white hover:bg-[#E88378] active:scale-[0.97] shadow-[var(--elevation-1)]",
-  gold: "bg-[var(--color-gold)] text-[#1A1816] hover:bg-[var(--color-gold-light)] active:scale-[0.97] gold-glow font-semibold",
+    "bg-[var(--color-error)] text-white hover:bg-[#E88378] hover:-translate-y-px active:scale-[0.96] shadow-[var(--elevation-1)]",
+  gold: "bg-[var(--color-gold)] text-[#1A1816] hover:bg-[var(--color-gold-light)] hover:-translate-y-px active:scale-[0.96] gold-glow font-semibold",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -40,7 +40,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           "inline-flex items-center justify-center font-medium tracking-tight",
-          "transition-all duration-[var(--duration-fast)] ease-[var(--spring-bouncy)]",
+          "transition-all duration-[var(--duration-fast)] ease-[var(--spring-ios)]",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-gold)]",
           "disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:shadow-none",
           "cursor-pointer select-none",

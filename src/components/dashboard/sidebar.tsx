@@ -49,7 +49,7 @@ export function Sidebar({
             <Camera className="w-4 h-4 text-[#1A1816]" />
           </div>
           <span className="text-base font-heading font-semibold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>
-            Darkroom
+            Lightmeter
           </span>
         </div>
 
@@ -61,7 +61,7 @@ export function Sidebar({
               href={item.href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
-                "transition-all duration-[var(--duration-fast)] ease-[var(--spring-bouncy)]",
+                "transition-all duration-[var(--duration-fast)] ease-[var(--spring-ios)]",
                 isActive(item.href)
                   ? "bg-[var(--color-gold-subtle)] text-[var(--color-gold)]"
                   : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-surface)]"
@@ -101,7 +101,7 @@ export function Sidebar({
             href={item.href}
             className={cn(
               "flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] font-medium",
-              "transition-colors duration-[var(--duration-fast)]",
+              "transition-all duration-[var(--duration-fast)] ease-[var(--spring-ios)] active:scale-90",
               isActive(item.href) ? "text-[var(--color-gold)]" : "text-[var(--color-text-disabled)]"
             )}
           >
