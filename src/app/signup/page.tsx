@@ -34,18 +34,23 @@ function SignupForm() {
     setError("");
     const supabase = createClient();
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    // signUp 在 email confirm 关闭时会自动登录
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email, password,
       options: { data: { full_name: name, plan: selectedPlan, trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() } },
     });
-    if (signUpError && !signUpError.message?.includes("already registered") && signUpError.status !== 422) {
+
+    if (signUpError) {
       setError(signUpError.message); setLoading(false); return;
     }
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    if (signInError) { setError(signInError.message); setLoading(false); return; }
-
-    router.push("/dashboard");
+    // signUp 成功后 session 已自动创建，直接跳转
+    if (data.session) {
+      router.push("/dashboard");
+    } else {
+      setError("Please check your email for confirmation link.");
+      setLoading(false);
+    }
   };
 
   return (
