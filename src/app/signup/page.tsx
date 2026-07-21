@@ -72,7 +72,7 @@ function SignupForm() {
           <Button type="submit" className="w-full" variant="gold" size="lg" loading={loading}>Start {planLabel} free trial</Button>
         </form>
         <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--color-border-subtle)]" /></div><div className="relative flex justify-center text-xs"><span className="bg-[#1A1816] px-2 text-[var(--color-text-disabled)]">or</span></div></div>
-        <Button type="button" variant="secondary" className="w-full" size="lg" onClick={() => window.location.href = "/api/auth/google"}>Continue with Google</Button>
+        <a href="/api/auth/google" className="inline-flex items-center justify-center font-medium tracking-tight transition-all duration-[var(--duration-fast)] ease-[var(--spring-bouncy)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-gold)] cursor-pointer select-none bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] border border-[var(--color-border-default)] hover:bg-[var(--color-bg-overlay)] active:scale-[0.97] px-6 py-3.5 text-base rounded-2xl w-full no-underline">Continue with Google</a>
         <p className="text-center text-sm text-[var(--color-text-secondary)]">Already have an account? <Link href="/login" className="text-[var(--color-text-primary)] hover:underline">Sign in</Link></p>
       </div>
     </div>
