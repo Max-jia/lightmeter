@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -10,35 +10,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
   }
 
-  const supabaseResponse = NextResponse.redirect(new URL("/dashboard", request.url), 303);
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => {
-          const cookiePairs = request.headers.get("cookie")?.split("; ") || [];
-          return cookiePairs.map((pair) => {
-            const [name, ...rest] = pair.split("=");
-            return { name, value: rest.join("=") };
-          });
-        },
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            supabaseResponse.cookies.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
-
+  const { supabase, responseCookies } = await createClient(true);
   const { error } = await supabase.auth.signInWithPassword({ email, password });
+
   if (error) {
-    return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(error.message)}`, request.url),
-      303
-    );
+    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error.message)}`, request.url), 303);
   }
 
-  return supabaseResponse;
+  const res = NextResponse.redirect(new URL("/dashboard", request.url), 303);
+  responseCookies.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
+  return res;
 }

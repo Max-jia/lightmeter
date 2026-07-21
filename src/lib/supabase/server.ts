@@ -2,33 +2,36 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 /**
- * Supabase 服务端客户端
- * 未配置环境变量时返回 null
+ * Supabase 服务端客户端（带 cookie 读写）
+ *
+ * if needResponseCookies = true，返回 { supabase, responseCookies }
+ * 用于 auth 路由：把 responseCookies 写入你的 redirect Response
+ *
+ * if needResponseCookies = false（默认），返回 supabase 客户端
+ * 用于数据查询：只需要读 cookie
  */
-export async function createClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+export async function createClient(needResponseCookies?: boolean): Promise<any> {
+  const cookieStore = await cookies();
+  const responseCookies: Array<{ name: string; value: string; options: any }> = [];
 
-  if (!url || !key || url === "https://your-project.supabase.co") {
-    throw new Error("SUPABASE_NOT_CONFIGURED");
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          responseCookies.push(...cookiesToSet);
+        },
+      },
+    }
+  );
+
+  if (needResponseCookies) {
+    return { supabase, responseCookies };
   }
 
-  const cookieStore = await cookies();
-
-  return createServerClient(url, key, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll();
-      },
-      setAll(cookiesToSet) {
-        try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
-        } catch {
-          // 服务端组件中 setAll 可能不可用
-        }
-      },
-    },
-  });
+  return supabase;
 }
