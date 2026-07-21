@@ -12,7 +12,7 @@ import { cookies } from "next/headers";
  */
 export async function createClient(needResponseCookies?: boolean): Promise<any> {
   const cookieStore = await cookies();
-  const responseCookies: Array<{ name: string; value: string; options: any }> = [];
+  const responseCookies: Array<{ name: string; value: string; options: Record<string, any> }> = [];
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

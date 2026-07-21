@@ -18,6 +18,6 @@ export async function POST(request: Request) {
   }
 
   const res = NextResponse.redirect(new URL("/dashboard", request.url), 303);
-  responseCookies.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
+  responseCookies.forEach((c: { name: string; value: string; options: Record<string, any> }) => res.cookies.set(c.name, c.value, c.options));
   return res;
 }
