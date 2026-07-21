@@ -10,6 +10,8 @@ import { cookies } from "next/headers";
  * if needResponseCookies = false（默认），返回 supabase 客户端
  * 用于数据查询：只需要读 cookie
  */
+type CookieItem = { name: string; value: string; options: Record<string, any> };
+
 export async function createClient(needResponseCookies?: boolean): Promise<any> {
   const cookieStore = await cookies();
   const responseCookies: Array<{ name: string; value: string; options: Record<string, any> }> = [];
