@@ -1,10 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-/**
- * 邮箱密码注册 API
- * 注册后跳转到付费墙（Stripe Checkout）
- */
 export async function POST(request: Request) {
   const formData = await request.formData();
   const email = formData.get("email") as string;
@@ -13,14 +9,13 @@ export async function POST(request: Request) {
   const plan = (formData.get("plan") as string) || "standard";
 
   if (!email || !password) {
-    return NextResponse.json(
-      { error: "Email and password are required" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+
+  // 注册用户
+  const { error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -32,13 +27,25 @@ export async function POST(request: Request) {
     },
   });
 
-  if (error) {
+  if (signUpError) {
+    // 已注册 → 直接登录
+    if (signUpError.message?.includes("already registered") || signUpError.status === 422) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (!signInError) {
+        return NextResponse.redirect(new URL("/dashboard", request.url), 303);
+      }
+    }
     return NextResponse.redirect(
-      new URL(`/signup?error=${encodeURIComponent(error.message)}`, request.url),
+      new URL(`/signup?error=${encodeURIComponent(signUpError.message)}`, request.url),
       303
     );
   }
 
-  // 注册成功 → 直接进 Dashboard（14天免费试用）
+  // 注册成功后立即登录
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+  if (signInError) {
+    return NextResponse.redirect(new URL("/dashboard", request.url), 303);
+  }
+
   return NextResponse.redirect(new URL("/dashboard", request.url), 303);
 }
