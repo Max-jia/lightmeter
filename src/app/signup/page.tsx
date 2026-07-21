@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabase/client";
 import { Check, Sparkles } from "lucide-react";
 import { Suspense } from "react";
 
@@ -14,14 +13,14 @@ export default function SignupPage() {
 }
 
 function SignupForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const selectedPlan = (params.get("plan") as "standard" | "pro") || "standard";
+  const serverError = params.get("error") || "";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(serverError);
 
   const planLabel = selectedPlan === "pro" ? "Pro" : "Standard";
   const planPrice = selectedPlan === "pro" ? "$35/mo" : "$19/mo";
@@ -37,16 +36,18 @@ function SignupForm() {
     return msg;
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !email.trim() || !password.trim()) { setError("Please fill in all fields."); return; }
-    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
-    setLoading(true); setError("");
-    const supabase = createClient();
-    const { data, error: err } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name, plan: selectedPlan, trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() } } });
-    if (err) { setError(friendlyError(err.message)); setLoading(false); return; }
-    if (data.session) { router.push("/dashboard"); }
-    else { setError("Please check your email for a confirmation link."); setLoading(false); }
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      e.preventDefault();
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (password.length < 6) {
+      e.preventDefault();
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    setLoading(true);
   };
 
   return (
@@ -61,11 +62,13 @@ function SignupForm() {
           <ul className="space-y-1.5">{planFeatures.map(f => <li key={f} className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]"><Check className="w-3.5 h-3.5 text-[var(--color-gold)]" />{f}</li>)}</ul>
           <div className="mt-3 pt-3 border-t border-[var(--color-border-subtle)] flex items-center gap-2 text-xs text-[var(--color-text-secondary)]"><Sparkles className="w-3.5 h-3.5 text-[var(--color-gold)]" />Charged after 14-day trial.</div>
         </div>
-        {error && <div className="p-3 rounded-xl bg-[var(--color-error-bg)] border border-[var(--color-error)]/20 text-sm text-[var(--color-error)] text-center" dangerouslySetInnerHTML={{ __html: error }} />}
-        <form className="space-y-4" onSubmit={handleSignup}>
-          <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Smith" required />
-          <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jane@example.com" required />
-          <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" required helperText="At least 6 characters" />
+        {error && !serverError && <div className="p-3 rounded-xl bg-[var(--color-error-bg)] border border-[var(--color-error)]/20 text-sm text-[var(--color-error)] text-center" dangerouslySetInnerHTML={{ __html: error }} />}
+        {serverError && <div className="p-3 rounded-xl bg-[var(--color-error-bg)] border border-[var(--color-error)]/20 text-sm text-[var(--color-error)] text-center" dangerouslySetInnerHTML={{ __html: friendlyError(serverError) }} />}
+        <form className="space-y-4" action="/api/auth/signup" method="POST" onSubmit={handleSubmit}>
+          <input type="hidden" name="plan" value={selectedPlan} />
+          <Input label="Full name" name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Smith" required />
+          <Input label="Email" type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jane@example.com" required />
+          <Input label="Password" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" required helperText="At least 6 characters" />
           <Button type="submit" className="w-full" variant="gold" size="lg" loading={loading}>Start {planLabel} free trial</Button>
         </form>
         <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--color-border-subtle)]" /></div><div className="relative flex justify-center text-xs"><span className="bg-[#1A1816] px-2 text-[var(--color-text-disabled)]">or</span></div></div>
