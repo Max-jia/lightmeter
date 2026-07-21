@@ -52,7 +52,7 @@ function LoginForm() {
           <Button type="submit" className="w-full" size="lg" loading={loading}>Sign in</Button>
         </form>
         <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--color-border-subtle)]" /></div><div className="relative flex justify-center text-xs"><span className="bg-[var(--color-bg-base)] px-2 text-[var(--color-text-disabled)]">or</span></div></div>
-        <a href="/api/auth/google"><Button type="button" variant="secondary" className="w-full" size="lg">Continue with Google</Button></a>
+        <Button type="button" variant="secondary" className="w-full" size="lg" onClick={() => window.location.href = "/api/auth/google"}>Continue with Google</Button>
         <p className="text-center text-sm text-[var(--color-text-secondary)]">Don&apos;t have an account?{" "}<Link href="/signup" className="text-[var(--color-accent)] hover:underline">Start free trial</Link></p>
       </div>
     </div>

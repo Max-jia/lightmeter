@@ -72,7 +72,7 @@ function SignupForm() {
           <Button type="submit" className="w-full" variant="gold" size="lg" loading={loading}>Start {planLabel} free trial</Button>
         </form>
         <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--color-border-subtle)]" /></div><div className="relative flex justify-center text-xs"><span className="bg-[#1A1816] px-2 text-[var(--color-text-disabled)]">or</span></div></div>
-        <a href="/api/auth/google"><Button type="button" variant="secondary" className="w-full" size="lg">Continue with Google</Button></a>
+        <Button type="button" variant="secondary" className="w-full" size="lg" onClick={() => window.location.href = "/api/auth/google"}>Continue with Google</Button>
         <p className="text-center text-sm text-[var(--color-text-secondary)]">Already have an account? <Link href="/login" className="text-[var(--color-text-primary)] hover:underline">Sign in</Link></p>
       </div>
     </div>
