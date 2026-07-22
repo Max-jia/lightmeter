@@ -1,6 +1,6 @@
 {
-  "name": "Darkroom — AI CRM for Photographers",
-  "short_name": "Darkroom",
+  "name": "Lightmeter — AI CRM for Photographers",
+  "short_name": "Lightmeter",
   "description": "The AI-native CRM for photographers. Auto-reply to inquiries, send proposals, contracts, and get paid.",
   "start_url": "/dashboard",
   "display": "standalone",

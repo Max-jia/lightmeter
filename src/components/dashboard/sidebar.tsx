@@ -12,7 +12,6 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Camera,
 } from "lucide-react";
 
 export function Sidebar({
@@ -45,9 +44,7 @@ export function Sidebar({
       <aside className="hidden md:flex flex-col w-64 border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-base)]">
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-5 py-5 border-b border-[var(--color-border-subtle)]">
-          <div className="w-8 h-8 rounded-xl bg-[var(--color-gold)] flex items-center justify-center shadow-[var(--elevation-1)]">
-            <Camera className="w-4 h-4 text-[#1A1816]" />
-          </div>
+          <img src="/logo.png" alt="Lightmeter" className="w-10 h-10 rounded-xl" />
           <span className="text-base font-heading font-semibold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>
             Lightmeter
           </span>
