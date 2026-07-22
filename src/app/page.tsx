@@ -23,7 +23,7 @@ export default function LandingPage() {
             <Camera className="w-4 h-4 text-[#1A1816]" />
           </div>
           <span className="text-lg font-heading font-semibold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>
-            Darkroom
+            Lightmeter
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -54,7 +54,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="mt-6 text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto leading-relaxed">
-            Darkroom connects to your Gmail, reads inquiries, and drafts replies — while you shoot.
+            Lightmeter connects to your Gmail, reads inquiries, and drafts replies — while you shoot.
             One link handles proposals, contracts, and payments. Beautiful analytics tell you how your business is doing.
           </p>
 
@@ -128,7 +128,7 @@ export default function LandingPage() {
               Avg. reply: 14m
             </h3>
             <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
-              4x faster than manual. Photographers using Darkroom respond in under 15 minutes.
+              4x faster than manual. Photographers using Lightmeter respond in under 15 minutes.
             </p>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function LandingPage() {
             <thead>
               <tr className="border-b border-[var(--color-border-subtle)]">
                 <th className="text-left py-3.5 px-5 text-[var(--color-text-secondary)] font-normal">Feature</th>
-                <th className="text-center py-3.5 px-5 font-heading font-semibold text-[var(--color-gold)]">Darkroom</th>
+                <th className="text-center py-3.5 px-5 font-heading font-semibold text-[var(--color-gold)]">Lightmeter</th>
                 <th className="text-center py-3.5 px-5 text-[var(--color-text-disabled)] font-normal">HoneyBook</th>
                 <th className="text-center py-3.5 px-5 text-[var(--color-text-disabled)] font-normal">Dubsado</th>
               </tr>
@@ -228,10 +228,10 @@ export default function LandingPage() {
             <div className="w-6 h-6 rounded-md bg-[var(--color-gold)]/20 flex items-center justify-center">
               <Camera className="w-3 h-3 text-[var(--color-gold)]" />
             </div>
-            <span className="text-sm font-heading font-semibold">Darkroom</span>
+            <span className="text-sm font-heading font-semibold">Lightmeter</span>
           </div>
           <p className="text-xs text-[var(--color-text-disabled)]">
-            © 2026 Darkroom. AI CRM for photographers.
+            © 2026 Lightmeter. AI CRM for photographers.
           </p>
         </div>
       </footer>

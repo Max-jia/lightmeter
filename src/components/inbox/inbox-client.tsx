@@ -86,7 +86,7 @@ export function InboxClient() {
             Connect your Gmail
           </h2>
           <p className="text-sm text-[var(--color-text-secondary)] max-w-md mx-auto">
-            Darkroom needs access to your Gmail to read inquiries and draft replies. We only read email subjects and bodies.
+            Lightmeter needs access to your Gmail to read inquiries and draft replies. We only read email subjects and bodies.
           </p>
         </div>
         <a href="/api/gmail">

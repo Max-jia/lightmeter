@@ -44,7 +44,7 @@ Looking forward to hearing from you!
 
 Warmly,
 [Photographer Name]
-Darkroom Photography`,
+Lightmeter Photography`,
   confidence: 92,
 };
 
