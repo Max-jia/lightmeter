@@ -46,8 +46,9 @@ export default function LoginPage() {
         {info && <div className="p-3 rounded-xl bg-[var(--color-gold-subtle)] border border-[var(--color-gold)]/20 text-sm text-[var(--color-text-secondary)] text-center">{info}</div>}
         {error && <div className="p-3 rounded-xl bg-[var(--color-error-bg)] border border-[var(--color-error)]/20 text-sm text-[var(--color-error)] text-center">{error}</div>}
         <form className="space-y-4" action="/api/auth/login" method="POST" onSubmit={handleSubmit}>
+          <input type="text" name="prevent_autofill" autoComplete="off" style={{display:"none"}} tabIndex={-1} />
           <Input label="Email" type="email" name="email" autoComplete="off" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
-          <Input label="Password" type="password" name="password" autoComplete="off" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+          <Input label="Password" type="password" name="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
           <Button type="submit" className="w-full" size="lg" loading={loading}>Sign in</Button>
         </form>
         <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--color-border-subtle)]" /></div><div className="relative flex justify-center text-xs"><span className="bg-[var(--color-bg-base)] px-2 text-[var(--color-text-disabled)]">or</span></div></div>
