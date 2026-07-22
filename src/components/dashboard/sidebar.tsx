@@ -44,7 +44,7 @@ export function Sidebar({
       <aside className="hidden md:flex flex-col w-64 border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-base)]">
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-5 py-5 border-b border-[var(--color-border-subtle)]">
-          <img src="/logo.png" alt="Lightmeter" className="w-10 h-10 rounded-xl" />
+          <img src="/logo-96.png" alt="Lightmeter" className="w-10 h-10 rounded-xl" />
           <span className="text-base font-heading font-semibold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>
             Lightmeter
           </span>

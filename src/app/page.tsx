@@ -19,9 +19,7 @@ export default function LandingPage() {
       {/* ===== Nav ===== */}
       <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[var(--color-gold)] to-[var(--color-amber)] flex items-center justify-center shadow-[0_0_20px_var(--color-gold-glow)]">
-            <Camera className="w-4 h-4 text-[#1A1816]" />
-          </div>
+          <img src="/logo-48.png" alt="Lightmeter" className="w-8 h-8 rounded-xl" />
           <span className="text-lg font-heading font-semibold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>
             Lightmeter
           </span>
@@ -225,9 +223,7 @@ export default function LandingPage() {
       <footer className="max-w-6xl mx-auto px-6 py-12 border-t border-[var(--color-border-subtle)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-[var(--color-gold)]/20 flex items-center justify-center">
-              <Camera className="w-3 h-3 text-[var(--color-gold)]" />
-            </div>
+            <img src="/logo-48.png" alt="Lightmeter" className="w-6 h-6 rounded-md" />
             <span className="text-sm font-heading font-semibold">Lightmeter</span>
           </div>
           <p className="text-xs text-[var(--color-text-disabled)]">
