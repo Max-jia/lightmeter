@@ -184,14 +184,17 @@ export default function LinksPage() {
               {showContractPreview && (
                 <div className="relative mt-1">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-[var(--color-text-disabled)]">Preview — client will sign this before paying</span>
+                    <span className="text-xs text-[var(--color-text-disabled)]">Edit contract text — client will sign this before paying</span>
                     <button type="button" className="text-xs text-[var(--color-gold)]" onClick={() => { setShowContractPreview(false); setSelectedTemplate(""); setContractTemplate(""); }}>
                       Remove
                     </button>
                   </div>
-                  <div className="max-h-32 overflow-y-auto p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-xs text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap">
-                    {contractTemplate}
-                  </div>
+                  <textarea
+                    value={contractTemplate}
+                    onChange={(e) => setContractTemplate(e.target.value)}
+                    className="w-full min-h-[180px] p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-sm text-[var(--color-text-primary)] leading-relaxed resize-y focus:outline-none focus:border-[var(--color-gold)] transition-colors"
+                    placeholder="Paste or edit your contract terms here..."
+                  />
                 </div>
               )}
             </div>
