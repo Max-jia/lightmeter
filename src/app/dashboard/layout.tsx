@@ -12,7 +12,7 @@ export default async function DashboardLayout({
   let user: any = null;
   let trialEndsAt: string | null = null;
   let subscriptionStatus: string | null = null;
-  let displayName: string | null = null;
+  let displayName: string | undefined;
 
   try {
     const supabase = await createClient();
