@@ -68,7 +68,7 @@ function SubscribeForm() {
             Upgrade to {planLabel}
           </h1>
           <p className="text-sm text-[var(--color-text-secondary)]">
-            14-day free trial, then ${planPrice}/month. Cancel anytime.
+            14-day free trial, then ${planPrice}/month billed automatically.
           </p>
         </div>
 
@@ -109,11 +109,11 @@ function SubscribeForm() {
 
         {/* Subscribe button */}
         <Button variant="gold" size="lg" className="w-full" loading={loading} onClick={handleSubscribe}>
-          Start free trial
+          Subscribe to {planLabel}
         </Button>
 
         <p className="text-center text-xs text-[var(--color-text-disabled)]">
-          Secured by Stripe. Your card will be charged ${planPrice}/month after the 14-day trial.
+          Secured by Stripe. 14-day free trial — you won&apos;t be charged until it ends.
         </p>
       </div>
     </div>
