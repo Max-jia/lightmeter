@@ -138,20 +138,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Billing */}
-      <Card padding="lg">
-        <div className="flex items-center gap-2 mb-4">
-          <CreditCard className="w-4 h-4 text-[var(--color-text-secondary)]" />
-          <h2 className="text-sm font-heading font-semibold">Subscription</h2>
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium">Standard Plan — $19/month</p>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-              Manage subscription in Stripe
-            </p>
-          </div>
-        </div>
-      </Card>
+      <SubscriptionSection />
 
       {/* Danger Zone */}
       <Card padding="lg" className="!border-red-900/30">
@@ -168,6 +155,107 @@ export default function SettingsPage() {
         </div>
       </Card>
     </div>
+  );
+}
+
+/** 订阅管理组件 */
+function SubscriptionSection() {
+  const [info, setInfo] = useState<{
+    plan?: string;
+    trial_ends_at?: string;
+    subscription_status?: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((r) => r.json())
+      .then((d) => {
+        setInfo(d);
+        setLoading(false);
+      });
+  }, []);
+
+  const handleManage = async () => {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+      setPortalLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card padding="lg">
+        <div className="flex items-center gap-2 mb-4">
+          <CreditCard className="w-4 h-4 text-[var(--color-text-secondary)]" />
+          <h2 className="text-sm font-heading font-semibold">Subscription</h2>
+        </div>
+        <div className="h-8 animate-shimmer rounded-lg bg-[var(--color-bg-elevated)]" />
+      </Card>
+    );
+  }
+
+  const trialEndDate = info?.trial_ends_at ? new Date(info.trial_ends_at) : null;
+  const daysLeft = trialEndDate
+    ? Math.ceil((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : 0;
+  const trialActive = daysLeft > 0;
+  const isActive = info?.subscription_status &&
+    ["trialing", "active", "past_due"].includes(info.subscription_status);
+
+  return (
+    <Card padding="lg">
+      <div className="flex items-center gap-2 mb-4">
+        <CreditCard className="w-4 h-4 text-[var(--color-text-secondary)]" />
+        <h2 className="text-sm font-heading font-semibold">Subscription</h2>
+      </div>
+
+      {isActive ? (
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-green-400">
+              {info?.plan === "pro" ? "Pro" : "Standard"} Plan — {info?.plan === "pro" ? "$35" : "$19"}/month
+            </p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+              {info?.subscription_status === "trialing" ? "Trial active" :
+               info?.subscription_status === "past_due" ? "Payment past due" : "Active"}
+            </p>
+          </div>
+          <Button variant="secondary" size="sm" loading={portalLoading} onClick={handleManage}>
+            Manage
+          </Button>
+        </div>
+      ) : trialActive ? (
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium">Free Trial</p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+              {daysLeft} day{daysLeft !== 1 ? "s" : ""} remaining
+            </p>
+          </div>
+          <a href="/subscribe?plan=standard">
+            <Button variant="gold" size="sm">Upgrade</Button>
+          </a>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-[var(--color-error)]">Trial expired</p>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+              Subscribe to continue using all features
+            </p>
+          </div>
+          <a href="/subscribe?plan=standard">
+            <Button variant="gold" size="sm">Subscribe</Button>
+          </a>
+        </div>
+      )}
+    </Card>
   );
 }
 

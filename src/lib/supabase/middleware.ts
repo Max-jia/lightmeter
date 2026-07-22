@@ -47,6 +47,25 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // 试用期/订阅检查（仅 dashboard 路由，排除 settings 页）
+  if (isDashboardRoute && user && request.nextUrl.pathname !== "/dashboard/settings") {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("trial_ends_at, subscription_status")
+      .eq("id", user.id)
+      .single();
+
+    const trialEnded = profile?.trial_ends_at && new Date(profile.trial_ends_at) < new Date();
+    const hasActiveSub = profile?.subscription_status &&
+      ["trialing", "active", "past_due"].includes(profile.subscription_status);
+
+    if (trialEnded && !hasActiveSub) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/subscribe";
+      return NextResponse.redirect(url);
+    }
+  }
+
   // 如果已登录，/login 跳转到 /dashboard
   if (request.nextUrl.pathname === "/login" && user) {
     const url = request.nextUrl.clone();

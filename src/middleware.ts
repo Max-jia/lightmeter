@@ -17,7 +17,7 @@ export const config = {
     "/dashboard/:path*",
     // 登录页面的重定向
     "/login",
-    // 排除静态文件和 API
-    "/((?!_next/static|_next/image|favicon.ico|api/).)*",
+    // 排除静态文件、API、订阅页、公开页
+    "/((?!_next/static|_next/image|favicon.ico|api/|subscribe|signup|payment/|l/).)*",
   ],
 };

@@ -26,7 +26,6 @@ function SubscribeForm() {
 
   const planLabel = plan === "pro" ? "Pro" : "Standard";
   const planPrice = plan === "pro" ? 35 : 19;
-  const planAmount = plan === "pro" ? 3500 : 1900; // cents
   const planFeatures =
     plan === "pro"
       ? ["Unlimited AI replies", "Everything in Standard", "Multi-brand support", "Priority support"]
@@ -40,10 +39,7 @@ function SubscribeForm() {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: planAmount,
-          description: `Lightmeter ${planLabel} Plan — 14-day free trial`,
-        }),
+        body: JSON.stringify({ plan }),
       });
 
       const data = await res.json();
@@ -69,10 +65,10 @@ function SubscribeForm() {
             <CreditCard className="w-7 h-7 text-[var(--color-gold)]" />
           </div>
           <h1 className="text-2xl font-heading font-semibold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>
-            Start your {planLabel} trial
+            Upgrade to {planLabel}
           </h1>
           <p className="text-sm text-[var(--color-text-secondary)]">
-            14 days free, then {planPrice}/month. Cancel anytime.
+            14-day free trial, then ${planPrice}/month. Cancel anytime.
           </p>
         </div>
 
@@ -100,7 +96,7 @@ function SubscribeForm() {
           </ul>
           <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--color-gold-subtle)] border border-[var(--color-gold)]/20 text-xs text-[var(--color-text-secondary)]">
             <Shield className="w-3.5 h-3.5 text-[var(--color-gold)] flex-shrink-0" />
-            You won&apos;t be charged until your 14-day trial ends. Cancel anytime before then.
+            You won't be charged during the 14-day trial. Cancel anytime before it ends.
           </div>
         </Card>
 
@@ -113,7 +109,7 @@ function SubscribeForm() {
 
         {/* Subscribe button */}
         <Button variant="gold" size="lg" className="w-full" loading={loading} onClick={handleSubscribe}>
-          Enter payment details
+          Start free trial
         </Button>
 
         <p className="text-center text-xs text-[var(--color-text-disabled)]">
