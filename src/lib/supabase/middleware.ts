@@ -34,10 +34,14 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // 刷新 session（不阻塞请求）
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // 只在需要时检查用户（dashboard 保护、login 跳转）
+  const needsAuth = request.nextUrl.pathname.startsWith("/dashboard") || request.nextUrl.pathname === "/login";
+  let user = null;
+
+  if (needsAuth) {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  }
 
   // 保护 dashboard 路由
   const isDashboardRoute = request.nextUrl.pathname.startsWith("/dashboard");

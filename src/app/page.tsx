@@ -56,20 +56,20 @@ export default function LandingPage() {
             One link handles proposals, contracts, and payments. Beautiful analytics tell you how your business is doing.
           </p>
 
-          <div className="mt-10 flex items-center justify-center gap-3">
+          <div className="mt-10 flex flex-col items-center gap-4">
             <Link href="/signup">
-              <Button variant="gold" size="lg">
-                Start free trial
-                <span className="ml-2 text-xs opacity-70">14 days free</span>
+              <Button variant="gold" size="lg" className="px-10 py-4 text-lg rounded-2xl shadow-[0_0_30px_rgba(212,160,69,0.3)]">
+                Start 14-day free trial
+                <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
-            <Link href="/login">
-              <Button variant="secondary" size="lg">
-                Sign in
-              </Button>
-            </Link>
+            <div className="flex items-center gap-6 text-xs text-[var(--color-text-disabled)]">
+              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-[var(--color-success)]" /> No credit card</span>
+              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-[var(--color-success)]" /> Cancel anytime</span>
+              <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-[var(--color-success)]" /> 2 min setup</span>
+            </div>
           </div>
-          <p className="mt-4 text-xs text-[var(--color-text-disabled)]">
+          <p>
             No credit card required · Cancel anytime
           </p>
         </div>
