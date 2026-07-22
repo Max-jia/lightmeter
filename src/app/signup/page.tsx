@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,12 +14,6 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [selectedPlan] = useState<"standard" | "pro">("standard");
 
-  const planLabel = selectedPlan === "pro" ? "Pro" : "Standard";
-  const planPrice = selectedPlan === "pro" ? "$35/mo" : "$19/mo";
-  const planFeatures = selectedPlan === "pro"
-    ? ["Unlimited AI replies", "Everything in Standard", "Multi-brand support", "Priority support"]
-    : ["AI Inbox (100 replies/mo)", "One-Link proposals & contracts", "Dashboard & Analytics", "Calendar", "Stripe payments"];
-
   const friendlyError = (msg: string) => {
     if (msg.includes("already registered") || msg.includes("already exists") || msg.includes("unique")) return "An account with this email already exists. <a href='/login'>Sign in instead?</a>";
     if (msg.includes("rate limit") || msg.includes("rate_limit")) return "Too many signups. Please wait a moment and try again, or use Google login.";
@@ -27,6 +21,18 @@ export default function SignupPage() {
     if (msg.includes("valid email") || msg.includes("email")) return "Please enter a valid email address.";
     return msg;
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("error");
+    if (err) setError(friendlyError(err));
+  }, []);
+
+  const planLabel = selectedPlan === "pro" ? "Pro" : "Standard";
+  const planPrice = selectedPlan === "pro" ? "$35/mo" : "$19/mo";
+  const planFeatures = selectedPlan === "pro"
+    ? ["Unlimited AI replies", "Everything in Standard", "Multi-brand support", "Priority support"]
+    : ["AI Inbox (100 replies/mo)", "One-Link proposals & contracts", "Dashboard & Analytics", "Calendar", "Stripe payments"];
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     if (!name.trim() || !email.trim() || !password.trim()) {
