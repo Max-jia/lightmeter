@@ -12,6 +12,7 @@ export default async function DashboardLayout({
   let user: any = null;
   let trialEndsAt: string | null = null;
   let subscriptionStatus: string | null = null;
+  let displayName: string | null = null;
 
   try {
     const supabase = await createClient();
@@ -21,11 +22,12 @@ export default async function DashboardLayout({
     if (user) {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("trial_ends_at, subscription_status")
+        .select("trial_ends_at, subscription_status, full_name")
         .eq("id", user.id)
         .single();
       trialEndsAt = profile?.trial_ends_at || null;
       subscriptionStatus = profile?.subscription_status || null;
+      displayName = profile?.full_name || user.user_metadata?.full_name || null;
     }
   } catch {
     // Supabase 未配置 → 显示设置引导
@@ -62,7 +64,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar userEmail={user.email} userName={user.user_metadata?.full_name} />
+      <Sidebar userEmail={user.email} userName={displayName} />
       <main className="flex-1 overflow-y-auto">
         {/* Trial banner */}
         {showTrialBanner && (

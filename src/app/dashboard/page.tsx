@@ -32,6 +32,16 @@ export default async function DashboardHome() {
     user = data.user;
     supabaseConfigured = true;
 
+    // 从 profiles 表读名字（用户可能在 Settings 里改过）
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
+    if (profileData?.full_name) {
+      user.user_metadata = { ...user.user_metadata, full_name: profileData.full_name };
+    }
+
     // 查询真实数据
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
