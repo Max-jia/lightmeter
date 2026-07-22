@@ -1,4 +1,4 @@
-# Lightmeter — Product Hunt Launch Kit
+ Lightmeter — Product Hunt Launch Kit
 
 ## 发布信息
 - **发布日期**: 周二 12:01 AM PST
