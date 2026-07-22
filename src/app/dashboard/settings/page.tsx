@@ -202,7 +202,7 @@ function SubscriptionSection() {
 
   const trialEndDate = info?.trial_ends_at ? new Date(info.trial_ends_at) : null;
   const daysLeft = trialEndDate
-    ? Math.ceil((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    ? Math.max(1, Math.round((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
   const trialActive = daysLeft > 0;
   const isActive = info?.subscription_status &&

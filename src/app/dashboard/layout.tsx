@@ -53,7 +53,7 @@ export default async function DashboardLayout({
   // 计算试用剩余天数
   const trialEndDate = trialEndsAt ? new Date(trialEndsAt) : null;
   const daysLeft = trialEndDate
-    ? Math.ceil((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    ? Math.max(1, Math.round((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
   const trialActive = daysLeft > 0;
   const hasSubscription = subscriptionStatus &&
