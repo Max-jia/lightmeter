@@ -65,7 +65,7 @@ export default function SignupPage() {
           <input type="hidden" name="plan" value={selectedPlan} />
           <Input label="Full name" name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Smith" required />
           <Input label="Email" type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jane@example.com" required />
-          <Input label="Password" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" required helperText="At least 6 characters" />
+          <Input label="Password" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 6 characters" required helperText="At least 6 characters" />
           <Button type="submit" className="w-full" variant="gold" size="lg" loading={loading}>Start {planLabel} free trial</Button>
         </form>
         <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--color-border-subtle)]" /></div><div className="relative flex justify-center text-xs"><span className="bg-[#1A1816] px-2 text-[var(--color-text-disabled)]">or</span></div></div>
