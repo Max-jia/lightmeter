@@ -54,6 +54,7 @@ export default async function DashboardHome() {
 
     const allClients = clientsRes.data || [];
     upcomingClients = allClients
+      .filter((c: any) => c.status !== "completed" && c.status !== "archived")
       .filter((c: any) => c.event_date && c.event_date >= now.toISOString().split("T")[0])
       .sort((a: any, b: any) => a.event_date.localeCompare(b.event_date))
       .slice(0, 5);

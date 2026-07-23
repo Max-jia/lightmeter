@@ -17,7 +17,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#1A1816] text-[#F5F0EB]">
       {/* ===== Nav ===== */}
-      <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
+      <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto border-b border-[var(--color-border-subtle)]">
         <div className="flex items-center gap-2.5">
           <img src="/logo-48.png" alt="Lightmeter" className="w-8 h-8 rounded-xl" />
           <span className="text-lg font-heading font-semibold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>
@@ -216,6 +216,23 @@ export default function LandingPage() {
             </div>
             <Link href="/signup?plan=pro"><Button className="w-full mt-6" variant="gold" size="md">Start free trial</Button></Link>
           </div>
+        </div>
+      </section>
+
+      {/* ===== Bottom CTA ===== */}
+      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
+        <div className="relative p-12 rounded-3xl bg-gradient-to-br from-[var(--color-gold-subtle)] to-[var(--color-bg-surface)] border border-[var(--color-gold)]/20">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[200px] rounded-full bg-[var(--color-gold-glow)] blur-3xl opacity-20 pointer-events-none" />
+          <h2 className="relative text-3xl font-heading font-bold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>
+            Ready to streamline your photography business?
+          </h2>
+          <p className="relative mt-3 text-[var(--color-text-secondary)]">Free 14-day trial · No credit card · Cancel anytime</p>
+          <Link href="/signup" className="relative inline-block mt-8">
+            <Button variant="gold" size="lg" className="px-10 py-4 text-lg rounded-2xl shadow-[0_0_30px_rgba(212,160,69,0.3)]">
+              Start free trial
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </Link>
         </div>
       </section>
 

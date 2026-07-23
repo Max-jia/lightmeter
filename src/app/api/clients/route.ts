@@ -70,7 +70,7 @@ export async function PATCH(request: Request) {
   if (!id) return NextResponse.json({ error: "Client id required" }, { status: 400 });
 
   const updates: Record<string, any> = {};
-  const fields = ["name","email","phone","instagram","whatsapp","event_type","event_date","location","partner_name","budget","referral_source","notes"];
+  const fields = ["name","email","phone","instagram","whatsapp","event_type","event_date","location","partner_name","budget","referral_source","notes","status"];
   for (const f of fields) {
     if (body[f] !== undefined) updates[f] = body[f] === "" ? null : body[f];
   }

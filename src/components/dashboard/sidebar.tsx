@@ -60,7 +60,7 @@ export function Sidebar({
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
                 "transition-all duration-[var(--duration-fast)] ease-[var(--spring-ios)]",
                 isActive(item.href)
-                  ? "bg-[var(--color-gold-subtle)] text-[var(--color-gold)]"
+                  ? "bg-[var(--color-gold-subtle)] text-[var(--color-gold)] font-semibold"
                   : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-surface)]"
               )}
             >

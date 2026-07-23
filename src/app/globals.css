@@ -106,6 +106,41 @@ body {
   border-radius: var(--radius-sm);
 }
 
+/* ── Date input — readable on dark backgrounds ── */
+input[type="date"] {
+  color-scheme: light;
+  background: #2E2C2A;
+  color: #F5F0EB;
+  border: 1px solid var(--color-border-subtle);
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* ── Celebrate animation ── */
+@keyframes celebrateOut {
+  0% { opacity: 1; transform: scale(1); }
+  30% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(0.95) translateX(-8px); }
+}
+.celebrate-card {
+  will-change: transform, opacity;
+  animation: celebrateOut 0.5s ease-out forwards;
+}
+
+@keyframes celebrateStar {
+  0% { transform: scale(0) translateY(0); opacity: 1; }
+  100% { transform: scale(1.2) translateY(-24px); opacity: 0; }
+}
+.celebrate-star {
+  will-change: transform;
+  animation: celebrateStar 0.6s ease-out forwards;
+  font-size: 16px;
+  position: absolute;
+  z-index: 10;
+}
+
 /* ── Utility ~ Tailwind-friendly shorthand ── */
 .bg-base { background: var(--color-bg-base); }
 .bg-surface { background: var(--color-bg-surface); }

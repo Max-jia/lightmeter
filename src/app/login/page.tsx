@@ -41,7 +41,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-heading font-semibold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>Lightmeter</h1>
-          <p className="text-sm text-[var(--color-text-secondary)]">AI CRM for photographers</p>
+          <p className="text-sm text-[var(--color-text-secondary)]">Welcome back</p>
         </div>
         {info && <div className="p-3 rounded-xl bg-[var(--color-gold-subtle)] border border-[var(--color-gold)]/20 text-sm text-[var(--color-text-secondary)] text-center">{info}</div>}
         {error && <div className="p-3 rounded-xl bg-[var(--color-error-bg)] border border-[var(--color-error)]/20 text-sm text-[var(--color-error)] text-center">{error}</div>}
