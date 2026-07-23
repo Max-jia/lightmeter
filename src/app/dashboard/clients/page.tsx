@@ -36,11 +36,13 @@ export default function ClientsPage() {
   };
   useEffect(() => { loadClients(); }, []);
 
-  const openAdd = () => { setEditId(null); setForm({...EMPTY_FORM, contacts: {}}); setShowModal(true); };
+  const openAdd = () => { setEditId(null); setForm({...EMPTY_FORM, contacts: {email: ""}}); setShowModal(true); };
   const openEdit = (c: any) => {
     setEditId(c.id);
     const contacts: Partial<Record<ContactKey, string>> = {};
+    // 始终显示已填的 + 默认显示 email
     CONTACT_OPTIONS.forEach(k => { if (c[k]) contacts[k] = c[k]; });
+    if (!contacts.email) contacts.email = "";
     setForm({
       name: c.name || "", contacts,
       event_type: c.event_type || "other", event_date: c.event_date || "", location: c.location || "",
