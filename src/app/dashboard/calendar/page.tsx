@@ -8,11 +8,11 @@ import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import Link from "next/link";
 
 const EVENT_COLORS: Record<string, string> = {
-  wedding: "bg-pink-500/20 text-pink-400 border-pink-500/30",
-  portrait: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  event: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  engagement: "bg-rose-500/20 text-rose-400 border-rose-500/30",
-  other: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  wedding:    "text-[#E8AAB4] bg-[#E8AAB4]/15 border-[#E8AAB4]/30",
+  portrait:   "text-[#9ECCC5] bg-[#9ECCC5]/15 border-[#9ECCC5]/30",
+  event:      "text-[#C8B0D0] bg-[#C8B0D0]/15 border-[#C8B0D0]/30",
+  engagement: "text-[#E0C4A0] bg-[#E0C4A0]/15 border-[#E0C4A0]/30",
+  other:      "text-[#D4B870] bg-[#D4B870]/15 border-[#D4B870]/30",
 };
 
 export default function CalendarPage() {
