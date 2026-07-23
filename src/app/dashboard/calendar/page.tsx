@@ -34,8 +34,15 @@ export default function CalendarPage() {
   const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const monthDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const today = new Date().getDate();
-  const isCurrentMonth = month === new Date().getMonth() && year === new Date().getFullYear();
+  const today = new Date();
+  const todayDate = today.getDate();
+  const isCurrentMonth = month === today.getMonth() && year === today.getFullYear();
+
+  const isPast = (dateStr: string) => {
+    const d = new Date(dateStr);
+    d.setHours(23, 59, 59, 999); // end of day
+    return d < today;
+  };
 
   const eventsByDay: Record<number, any[]> = {};
   events.forEach((e) => {
@@ -78,7 +85,7 @@ export default function CalendarPage() {
           {monthDays.map(day => {
             const dayEvents = eventsByDay[day];
             const hasEvent = dayEvents && dayEvents.length > 0;
-            const isToday = isCurrentMonth && day === today;
+            const isToday = isCurrentMonth && day === todayDate;
             return (
               <div
                 key={day}
@@ -92,13 +99,26 @@ export default function CalendarPage() {
                     : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)]"
                 }`}>
                 {day}
-                {hasEvent && <div className={`w-1.5 h-1.5 rounded-full ${isToday ? "bg-[#1A1816]" : "bg-[var(--color-gold)]"}`} />}
+                {hasEvent && (
+                  <div className="flex gap-0.5">
+                    {dayEvents.map((e: any) => (
+                      <div key={e.id} className={`w-1.5 h-1.5 rounded-full ${
+                        isToday ? "bg-[#1A1816]" :
+                        isPast(e.event_date) ? "bg-[var(--color-text-disabled)]" :
+                        "bg-[var(--color-gold)]"
+                      }`} />
+                    ))}
+                  </div>
+                )}
                 {/* Tooltip */}
                 {hasEvent && hoverDay === day && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 w-56 p-3 rounded-xl bg-[var(--color-bg-overlay)] border border-[var(--color-border-default)] shadow-[var(--elevation-3)] animate-fade-in-scale">
                     {dayEvents.map((e: any) => (
-                      <div key={e.id} className={`px-2.5 py-2 rounded-lg border ${EVENT_COLORS[e.event_type] || EVENT_COLORS["other"]} ${dayEvents.length > 1 ? "mb-1.5 last:mb-0" : ""}`}>
-                        <p className="text-sm font-medium">{e.name}</p>
+                      <div key={e.id} className={`px-2.5 py-2 rounded-lg border ${isPast(e.event_date) ? "text-[var(--color-text-disabled)] bg-[var(--color-bg-elevated)]/50 border-[var(--color-border-subtle)]" : (EVENT_COLORS[e.event_type] || EVENT_COLORS["other"])} ${dayEvents.length > 1 ? "mb-1.5 last:mb-0" : ""}`}>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium">{e.name}</p>
+                          {isPast(e.event_date) && <span className="text-[10px] opacity-50">past</span>}
+                        </div>
                         <div className="flex items-center gap-2 mt-1 text-xs opacity-70">
                           <span>{e.event_type}</span>
                           {e.location && <span>· {e.location}</span>}
