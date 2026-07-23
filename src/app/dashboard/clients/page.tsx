@@ -5,11 +5,19 @@ import { Card } from "@/components/ui/card";
 import { Badge, Avatar } from "@/components/ui/misc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, X, Pencil, MoreVertical } from "lucide-react";
+import { Plus, X, Pencil, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
 
 const EVENT_TYPES = ["wedding", "portrait", "event", "engagement", "other"] as const;
-const EMPTY_FORM = { name: "", email: "", phone: "", instagram: "", event_type: "other", event_date: "", location: "", partner_name: "", budget: "", referral_source: "", notes: "" };
+const CONTACT_OPTIONS = ["email", "phone", "instagram", "whatsapp"] as const;
+type ContactKey = typeof CONTACT_OPTIONS[number];
+
+const CONTACT_LABELS: Record<ContactKey, string> = { email: "Email", phone: "Phone", instagram: "Instagram", whatsapp: "WhatsApp" };
+const CONTACT_PLACEHOLDERS: Record<ContactKey, string> = { email: "sarah@example.com", phone: "+1 555-0123", instagram: "sarahjohnson", whatsapp: "+1 555-0123" };
+
+interface ClientForm { name: string; contacts: Partial<Record<ContactKey, string>>; event_type: string; event_date: string; location: string; partner_name: string; budget: string; referral_source: string; notes: string; }
+
+const EMPTY_FORM: ClientForm = { name: "", contacts: {}, event_type: "other", event_date: "", location: "", partner_name: "", budget: "", referral_source: "", notes: "" };
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
@@ -17,7 +25,8 @@ export default function ClientsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({...EMPTY_FORM});
+  const [form, setForm] = useState<ClientForm>({...EMPTY_FORM});
+  const [contactMenuOpen, setContactMenuOpen] = useState(false);
 
   const loadClients = () => {
     fetch("/api/clients").then(r => r.json()).then(d => {
@@ -25,14 +34,15 @@ export default function ClientsPage() {
       setLoading(false);
     });
   };
-
   useEffect(() => { loadClients(); }, []);
 
-  const openAdd = () => { setEditId(null); setForm({...EMPTY_FORM}); setShowModal(true); };
+  const openAdd = () => { setEditId(null); setForm({...EMPTY_FORM, contacts: {}}); setShowModal(true); };
   const openEdit = (c: any) => {
     setEditId(c.id);
+    const contacts: Partial<Record<ContactKey, string>> = {};
+    CONTACT_OPTIONS.forEach(k => { if (c[k]) contacts[k] = c[k]; });
     setForm({
-      name: c.name || "", email: c.email || "", phone: c.phone || "", instagram: c.instagram || "",
+      name: c.name || "", contacts,
       event_type: c.event_type || "other", event_date: c.event_date || "", location: c.location || "",
       partner_name: c.partner_name || "", budget: c.budget || "", referral_source: c.referral_source || "",
       notes: c.notes || "",
@@ -43,25 +53,31 @@ export default function ClientsPage() {
   const handleSave = async () => {
     if (!form.name.trim()) { toast.error("Client name is required"); return; }
     setSaving(true);
-    const method = editId ? "PATCH" : "POST";
-    const body = editId ? { id: editId, ...form } : form;
+    const body: any = { name: form.name.trim(), event_type: form.event_type, event_date: form.event_date || null, location: form.location.trim() || null, partner_name: form.partner_name.trim() || null, budget: form.budget.trim() || null, referral_source: form.referral_source.trim() || null, notes: form.notes.trim() || null };
+    CONTACT_OPTIONS.forEach(k => { body[k] = form.contacts[k]?.trim() || null; });
+    if (editId) body.id = editId;
     const res = await fetch("/api/clients", {
-      method,
+      method: editId ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
     const data = await res.json();
     if (data.error) { toast.error(data.error); setSaving(false); return; }
     toast.success(editId ? "Client updated!" : "Client added!");
-    setShowModal(false);
-    setSaving(false);
-    loadClients();
+    setShowModal(false); setSaving(false); loadClients();
   };
 
+  const addContact = (key: ContactKey) => {
+    setForm({...form, contacts: {...form.contacts, [key]: form.contacts[key] || ""}});
+    setContactMenuOpen(false);
+  };
+  const removeContact = (key: ContactKey) => {
+    const next = {...form.contacts}; delete next[key]; setForm({...form, contacts: next});
+  };
+  const availableContacts = CONTACT_OPTIONS.filter(k => !(k in form.contacts));
+
   const statusVariant = (s: string): "default" | "success" | "warning" | "error" => {
-    const m: Record<string, "default" | "success" | "warning" | "error"> = {
-      lead: "default", active: "success", pending: "warning", completed: "default",
-    };
+    const m: Record<string, "default" | "success" | "warning" | "error"> = { lead: "default", active: "success", pending: "warning", completed: "default" };
     return m[s] || "default";
   };
 
@@ -98,9 +114,10 @@ export default function ClientsPage() {
                     {c.event_type && <Badge variant="gold">{c.event_type}</Badge>}
                   </div>
                   <div className="flex items-center gap-2 mt-1 text-xs text-[var(--color-text-secondary)] flex-wrap">
-                    {c.email && <span>{c.email}</span>}
-                    {c.phone && <span>· {c.phone}</span>}
-                    {c.instagram && <span>· @{c.instagram}</span>}
+                    {c.email && <span>✉️ {c.email}</span>}
+                    {c.phone && <span>📞 {c.phone}</span>}
+                    {c.instagram && <span>📷 @{c.instagram}</span>}
+                    {c.whatsapp && <span>💬 {c.whatsapp}</span>}
                     {c.event_date && <span>· {c.event_date}</span>}
                   </div>
                 </div>
@@ -123,12 +140,31 @@ export default function ClientsPage() {
 
             <Input label="Client name *" value={form.name} onChange={(e: any) => setForm({...form, name: e.target.value})} placeholder="Sarah Johnson" />
 
-            <div className="grid grid-cols-2 gap-3">
-              <Input label="Email" type="email" value={form.email} onChange={(e: any) => setForm({...form, email: e.target.value})} placeholder="sarah@example.com" />
-              <Input label="Phone" value={form.phone} onChange={(e: any) => setForm({...form, phone: e.target.value})} placeholder="+1 555-0123" />
+            {/* Dynamic contact methods */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-[var(--color-text-secondary)]">Contact</label>
+              {CONTACT_OPTIONS.map(k => form.contacts[k] !== undefined && (
+                <div key={k} className="flex items-center gap-2">
+                  <span className="text-xs text-[var(--color-text-disabled)] w-20 shrink-0">{CONTACT_LABELS[k]}</span>
+                  <Input value={form.contacts[k] || ""} onChange={(e: any) => setForm({...form, contacts: {...form.contacts, [k]: e.target.value}})} placeholder={CONTACT_PLACEHOLDERS[k]} className="flex-1" />
+                  <button onClick={() => removeContact(k)} className="p-1.5 rounded-lg text-[var(--color-text-disabled)] hover:text-[var(--color-error)]"><X className="w-4 h-4" /></button>
+                </div>
+              ))}
+              {availableContacts.length > 0 && (
+                <div className="relative">
+                  <button onClick={() => setContactMenuOpen(!contactMenuOpen)} className="flex items-center gap-1.5 text-xs text-[var(--color-gold)] hover:text-[var(--color-gold-light)] transition-colors">
+                    <Plus className="w-3.5 h-3.5" /> Add contact
+                  </button>
+                  {contactMenuOpen && (
+                    <div className="absolute top-full left-0 mt-1 z-50 w-40 rounded-xl bg-[var(--color-bg-overlay)] border border-[var(--color-border-default)] shadow-[var(--elevation-3)] py-1">
+                      {availableContacts.map(k => (
+                        <button key={k} onClick={() => addContact(k)} className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--color-bg-elevated)] transition-colors">{CONTACT_LABELS[k]}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-
-            <Input label="Instagram" value={form.instagram} onChange={(e: any) => setForm({...form, instagram: e.target.value})} placeholder="sarahjohnson (no @)" />
 
             <div className="grid grid-cols-2 gap-3">
               <Input label="Partner name" value={form.partner_name} onChange={(e: any) => setForm({...form, partner_name: e.target.value})} placeholder="John Smith" helperText="For weddings/engagements" />
@@ -145,11 +181,8 @@ export default function ClientsPage() {
               <Input label="Shoot date" type="date" value={form.event_date} onChange={(e: any) => setForm({...form, event_date: e.target.value})} />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Input label="Location" value={form.location} onChange={(e: any) => setForm({...form, location: e.target.value})} placeholder="Grand Ballroom, NYC" />
-              <Input label="Referral source" value={form.referral_source} onChange={(e: any) => setForm({...form, referral_source: e.target.value})} placeholder="Instagram / Friend / Google" />
-            </div>
-
+            <Input label="Location" value={form.location} onChange={(e: any) => setForm({...form, location: e.target.value})} placeholder="Grand Ballroom, NYC" />
+            <Input label="Referral source" value={form.referral_source} onChange={(e: any) => setForm({...form, referral_source: e.target.value})} placeholder="Instagram / Friend / Google" />
             <Input label="Notes" value={form.notes} onChange={(e: any) => setForm({...form, notes: e.target.value})} placeholder="Prefers afternoon shoots. Has 2 dogs." />
 
             <Button variant="gold" className="w-full" loading={saving} onClick={handleSave}>
