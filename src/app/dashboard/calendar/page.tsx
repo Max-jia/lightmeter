@@ -7,11 +7,20 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import Link from "next/link";
 
+const EVENT_COLORS: Record<string, string> = {
+  wedding: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+  portrait: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  event: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+  engagement: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+  other: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+};
+
 export default function CalendarPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
+  const [hoverDay, setHoverDay] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/api/calendar")
@@ -67,17 +76,38 @@ export default function CalendarPage() {
         </div>
         <div className="grid grid-cols-7 gap-2">
           {monthDays.map(day => {
-            const hasEvent = eventsByDay[day];
+            const dayEvents = eventsByDay[day];
+            const hasEvent = dayEvents && dayEvents.length > 0;
+            const isToday = isCurrentMonth && day === today;
             return (
-              <div key={day} className={`aspect-square rounded-xl text-sm flex flex-col items-center justify-center gap-0.5 ${
-                isCurrentMonth && day === today
-                  ? "bg-[var(--color-gold)] text-[#1A1816] font-bold"
-                  : hasEvent
-                  ? "bg-[var(--color-gold-subtle)] text-[var(--color-text-primary)]"
-                  : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)]"
-              }`}>
+              <div
+                key={day}
+                onMouseEnter={() => hasEvent && setHoverDay(day)}
+                onMouseLeave={() => setHoverDay(null)}
+                className={`relative aspect-square rounded-xl text-sm flex flex-col items-center justify-center gap-0.5 cursor-default ${
+                  isToday
+                    ? "bg-[var(--color-gold)] text-[#1A1816] font-bold"
+                    : hasEvent
+                    ? "bg-[var(--color-gold-subtle)] text-[var(--color-text-primary)] hover:bg-[var(--color-gold)]/15"
+                    : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)]"
+                }`}>
                 {day}
-                {hasEvent && <div className={`w-1.5 h-1.5 rounded-full ${isCurrentMonth && day === today ? "bg-[#1A1816]" : "bg-[var(--color-gold)]"}`} />}
+                {hasEvent && <div className={`w-1.5 h-1.5 rounded-full ${isToday ? "bg-[#1A1816]" : "bg-[var(--color-gold)]"}`} />}
+                {/* Tooltip */}
+                {hasEvent && hoverDay === day && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 w-56 p-3 rounded-xl bg-[var(--color-bg-overlay)] border border-[var(--color-border-default)] shadow-[var(--elevation-3)] animate-fade-in-scale">
+                    {dayEvents.map((e: any) => (
+                      <div key={e.id} className={`px-2.5 py-2 rounded-lg border ${EVENT_COLORS[e.event_type] || EVENT_COLORS["other"]} ${dayEvents.length > 1 ? "mb-1.5 last:mb-0" : ""}`}>
+                        <p className="text-sm font-medium">{e.name}</p>
+                        <div className="flex items-center gap-2 mt-1 text-xs opacity-70">
+                          <span>{e.event_type}</span>
+                          {e.location && <span>· {e.location}</span>}
+                        </div>
+                      </div>
+                    ))}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px w-3 h-3 rotate-45 bg-[var(--color-bg-overlay)] border-r border-b border-[var(--color-border-default)]" />
+                  </div>
+                )}
               </div>
             );
           })}
