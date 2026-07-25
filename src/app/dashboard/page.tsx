@@ -23,6 +23,9 @@ export default async function DashboardHome() {
   let stats: any = null;
   let upcomingClients: any[] = [];
   let recentEmails: any[] = [];
+  let unreadCount = 0;
+  let pendingLinksCount = 0;
+  let thisWeekShoots = 0;
   let supabaseConfigured = false;
 
   try {
@@ -44,13 +47,24 @@ export default async function DashboardHome() {
 
     // 查询真实数据
     const now = new Date();
+    const todayStr = now.toISOString().split("T")[0];
+    const weekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
-    const [clientsRes, emailsRes, paymentsRes] = await Promise.all([
-      supabase.from("clients").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
+    const [clientsRes, emailsRes, paymentsRes, unreadRes, pendingLinksRes, weekClientsRes] = await Promise.all([
+      supabase.from("clients").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
       supabase.from("emails").select("*").eq("user_id", user.id).eq("status", "draft_ready").order("received_at", { ascending: false }).limit(5),
       supabase.from("payments").select("amount").eq("user_id", user.id).eq("status", "completed").gte("paid_at", monthStart),
+      // 快捷面板数据
+      supabase.from("emails").select("id, status").eq("user_id", user.id).in("status", ["unread","read"]),
+      supabase.from("links").select("id, status").eq("user_id", user.id).in("status", ["pending","viewed"]),
+      supabase.from("clients").select("id").eq("user_id", user.id).not("event_date", "is", null).neq("status", "completed").neq("status", "archived").gte("event_date", todayStr).lte("event_date", weekEnd),
     ]);
+
+    // 快捷面板汇总
+    unreadCount = (unreadRes.data || []).length;
+    pendingLinksCount = (pendingLinksRes.data || []).length;
+    thisWeekShoots = (weekClientsRes.data || []).length;
 
     const allClients = clientsRes.data || [];
     upcomingClients = allClients
@@ -133,6 +147,60 @@ export default async function DashboardHome() {
           </Button>
         </Link>
       </div>
+
+      {/* Quick-Action Panel — 需要你关注 */}
+      {supabaseConfigured && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            {
+              count: unreadCount,
+              label: "Unread emails",
+              icon: Mail,
+              href: "/dashboard/inbox",
+              highlight: unreadCount > 0,
+              color: unreadCount > 0 ? "text-blue-400" : "text-[var(--color-text-disabled)]",
+            },
+            {
+              count: pendingLinksCount,
+              label: "Proposals pending",
+              icon: LinkIcon,
+              href: "/dashboard/links",
+              highlight: pendingLinksCount > 0,
+              color: pendingLinksCount > 0 ? "text-amber-400" : "text-[var(--color-text-disabled)]",
+            },
+            {
+              count: thisWeekShoots,
+              label: "Shoots this week",
+              icon: CalendarDays,
+              href: "/dashboard/calendar",
+              highlight: thisWeekShoots > 0,
+              color: thisWeekShoots > 0 ? "text-emerald-400" : "text-[var(--color-text-disabled)]",
+            },
+            {
+              count: stats?.draftsReady || 0,
+              label: "Drafts to review",
+              icon: Sparkles,
+              href: "/dashboard/inbox",
+              highlight: (stats?.draftsReady || 0) > 0,
+              color: (stats?.draftsReady || 0) > 0 ? "text-[var(--color-gold)]" : "text-[var(--color-text-disabled)]",
+            },
+          ].map((item) => (
+            <Link key={item.label} href={item.href}>
+              <Card depth={1} padding="md" className={`h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--elevation-2)] ${item.highlight ? "border-[var(--color-gold)]/30" : ""}`}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.highlight ? "bg-[var(--color-gold-subtle)]" : "bg-[var(--color-bg-elevated)]"}`}>
+                    <item.icon className={`w-5 h-5 ${item.color}`} />
+                  </div>
+                  <div>
+                    <p className={`text-xl font-heading font-bold ${item.highlight ? "text-[var(--color-text-primary)]" : "text-[var(--color-text-disabled)]"}`}>{item.count}</p>
+                    <p className="text-xs text-[var(--color-text-secondary)]">{item.label}</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger">
