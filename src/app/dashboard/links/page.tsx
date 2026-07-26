@@ -145,8 +145,8 @@ export default function LinksPage() {
 
       {/* New Link Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)}>
-          <div className="w-full max-w-md bg-[var(--color-bg-surface)] rounded-2xl border border-[var(--color-border-default)] shadow-[var(--elevation-4)] p-6 space-y-5" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-12 bg-black/60 backdrop-blur-sm overflow-y-auto" onClick={() => setShowModal(false)}>
+          <div className="w-full max-w-md bg-[var(--color-bg-surface)] rounded-2xl border border-[var(--color-border-default)] shadow-[var(--elevation-4)] p-5 space-y-3.5" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-heading font-semibold">New Link</h2>
               <button onClick={() => setShowModal(false)} className="p-1 rounded-lg hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-disabled)]"><X className="w-5 h-5" /></button>
@@ -155,7 +155,7 @@ export default function LinksPage() {
             {templates.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {templates.map((tpl) => (
-                  <button key={tpl.id} type="button" onClick={() => { setClientName(""); setAmount(tpl.proposal_amount ? String(tpl.proposal_amount / 100) : ""); setDescription(tpl.proposal_description || ""); setContractTemplate(tpl.contract_template || ""); if (tpl.contract_template) setShowContractPreview(true); }}
+                  <button key={tpl.id} type="button" onClick={() => { setAmount(tpl.proposal_amount ? String(tpl.proposal_amount / 100) : ""); setDescription(tpl.proposal_description || ""); setContractTemplate(tpl.contract_template || ""); if (tpl.contract_template) setShowContractPreview(true); }}
                     className="px-3 py-1.5 rounded-lg text-xs bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] hover:border-[var(--color-gold)]/50 hover:text-[var(--color-gold)] transition-all"
                   >{tpl.name}</button>
                 ))}
@@ -207,7 +207,7 @@ export default function LinksPage() {
                   <textarea
                     value={contractTemplate}
                     onChange={(e) => setContractTemplate(e.target.value)}
-                    className="w-full min-h-[180px] p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-sm text-[var(--color-text-primary)] leading-relaxed resize-y focus:outline-none focus:border-[var(--color-gold)] transition-colors"
+                    className="w-full min-h-[120px] p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-sm text-[var(--color-text-primary)] leading-relaxed resize-y focus:outline-none focus:border-[var(--color-gold)] transition-colors"
                     placeholder="Paste or edit your contract terms here..."
                   />
                 </div>
