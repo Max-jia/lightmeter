@@ -43,7 +43,7 @@ export async function GET() {
   const studioName = profile?.studio_name || "My Studio";
 
   try {
-    const emails = await fetchRecentEmails(validToken, 20);
+    const emails = await fetchRecentEmails(validToken, 10); // 限制 10 封，避免 Vercel 函数超时
 
     let newCount = 0;
     let processedCount = 0;
@@ -145,7 +145,11 @@ export async function GET() {
         }
       } catch (aiErr) {
         console.error("AI processing failed for email:", email.gmailId, aiErr);
-        // AI 失败不影响邮件入库
+          // AI 失败 → 标记为 read，不卡在 unread 队列里
+          await supabase.from("emails").update({
+            ai_classification: "unknown",
+            status: "read",
+          }).eq("id", inserted.id);
       }
     }
 
