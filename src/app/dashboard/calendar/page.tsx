@@ -33,7 +33,9 @@ export default function CalendarPage() {
 
   const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0=Sun
   const monthDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const paddedDays = [...Array(firstDayOfWeek).fill(null), ...monthDays];
   const today = new Date();
   const todayDate = today.getDate();
   const isCurrentMonth = month === today.getMonth() && year === today.getFullYear();
@@ -82,7 +84,8 @@ export default function CalendarPage() {
           {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d => <div key={d} className="text-center text-xs font-medium text-[var(--color-text-disabled)]">{d}</div>)}
         </div>
         <div className="grid grid-cols-7 gap-2">
-          {monthDays.map(day => {
+          {paddedDays.map((day, idx) => {
+            if (day === null) return <div key={`empty-${idx}`} />;
             const dayEvents = eventsByDay[day];
             const hasEvent = dayEvents && dayEvents.length > 0;
             const isToday = isCurrentMonth && day === todayDate;
