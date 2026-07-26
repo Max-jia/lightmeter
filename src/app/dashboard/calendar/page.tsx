@@ -58,7 +58,31 @@ export default function CalendarPage() {
   });
 
   if (loading) {
-    return <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-20 animate-shimmer rounded-xl bg-[var(--color-bg-surface)]" />)}</div>;
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1.5">
+            <div className="h-6 w-36 rounded animate-shimmer bg-[var(--color-bg-surface)]" />
+            <div className="h-4 w-24 rounded animate-shimmer bg-[var(--color-bg-surface)]" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-8 w-8 rounded-lg animate-shimmer bg-[var(--color-bg-surface)]" />
+            <div className="h-8 w-16 rounded-lg animate-shimmer bg-[var(--color-bg-surface)]" />
+            <div className="h-8 w-8 rounded-lg animate-shimmer bg-[var(--color-bg-surface)]" />
+          </div>
+        </div>
+        <div className="p-6 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)]">
+          <div className="grid grid-cols-7 gap-2 mb-3">
+            {["S","M","T","W","T","F","S"].map((d,i) => <div key={i} className="text-center h-4 w-6 mx-auto rounded animate-shimmer bg-[var(--color-bg-elevated)]" />)}
+          </div>
+          <div className="grid grid-cols-7 gap-2">
+            {Array.from({length: 35}).map((_,i) => (
+              <div key={i} className="aspect-square rounded-xl animate-shimmer bg-[var(--color-bg-elevated)] skeleton-enter" style={{animationDelay: `${i*0.02}s`}} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

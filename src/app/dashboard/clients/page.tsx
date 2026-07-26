@@ -109,7 +109,21 @@ export default function ClientsPage() {
     return m[s] || "default";
   };
 
-  if (loading) return <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-16 animate-shimmer rounded-xl bg-[var(--color-bg-surface)]" />)}</div>;
+  if (loading) return (
+    <div className="space-y-2">
+      {[1,2,3,4,5].map(i => (
+        <div key={i} className="skeleton-enter p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)]" style={{animationDelay: `${i*0.06}s`}}>
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full animate-shimmer bg-[var(--color-bg-elevated)]" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3.5 w-28 rounded animate-shimmer bg-[var(--color-bg-elevated)]" />
+              <div className="h-2.5 w-44 rounded animate-shimmer bg-[var(--color-bg-elevated)]" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -182,8 +196,15 @@ export default function ClientsPage() {
             {/* 时间线 */}
             <h3 className="text-sm font-heading font-semibold mb-3">Activity Timeline</h3>
             {timelineLoading ? (
-              <div className="space-y-3">
-                {[1,2,3].map(i => <div key={i} className="h-12 animate-shimmer rounded-xl bg-[var(--color-bg-elevated)]" />)}
+              <div className="relative pl-6 border-l-2 border-[var(--color-border-subtle)] space-y-4">
+                {[1,2,3].map(i => (
+                  <div key={i} className="relative skeleton-enter" style={{animationDelay: `${i*0.1}s`}}>
+                    <div className="absolute -left-[25px] top-1 w-3 h-3 rounded-full animate-shimmer bg-[var(--color-bg-elevated)]" />
+                    <div className="h-2.5 w-16 rounded animate-shimmer bg-[var(--color-bg-elevated)] mb-1.5" />
+                    <div className="h-4 w-40 rounded animate-shimmer bg-[var(--color-bg-elevated)] mb-1" />
+                    <div className="h-3 w-24 rounded animate-shimmer bg-[var(--color-bg-elevated)]" />
+                  </div>
+                ))}
               </div>
             ) : timeline.length === 0 ? (
               <p className="text-sm text-[var(--color-text-secondary)] py-4 text-center">No activity yet for this client.</p>
