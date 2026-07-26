@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, Badge, Skeleton } from "@/components/ui/misc";
-import { Mail, Zap, ChevronRight, Sparkles, Send, Edit3, Check, X, ArrowLeft, RefreshCw } from "lucide-react";
+import { Mail, Zap, ChevronRight, Sparkles, Send, Edit3, Check, X, ArrowLeft, RefreshCw, Trash2 } from "lucide-react";
 import { useApi } from "@/hooks/use-api";
 
 // ============================================================
@@ -250,6 +250,15 @@ function InboxDetailView({
   const [editedBody, setEditedBody] = useState(email.ai_draft_body || "");
   const [editedSubject, setEditedSubject] = useState(email.ai_draft_subject || `Re: ${email.subject}`);
   const [sendState, setSendState] = useState<"idle" | "sending" | "sent">(email.status === "sent" ? "sent" : "idle");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    await call("/api/emails/delete", { method: "POST", body: JSON.stringify({ emailId: email.id }) });
+    onRefresh();
+    onBack();
+  };
 
   const handleSend = async () => {
     setSendState("sending");
@@ -274,13 +283,30 @@ function InboxDetailView({
 
   return (
     <div className="space-y-6">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Inbox
-      </button>
+      <div className="flex items-center justify-between">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Inbox
+        </button>
+        {!showDeleteConfirm ? (
+          <button onClick={() => setShowDeleteConfirm(true)} className="flex items-center gap-1.5 text-xs text-[var(--color-text-disabled)] hover:text-[var(--color-error)] transition-colors">
+            <Trash2 className="w-3.5 h-3.5" /> Delete
+          </button>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[var(--color-text-secondary)]">Delete this email?</span>
+            <button onClick={handleDelete} disabled={deleting} className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--color-error)] text-white hover:bg-red-600 transition-colors">
+              {deleting ? "..." : "Yes, delete"}
+            </button>
+            <button onClick={() => setShowDeleteConfirm(false)} className="px-2 py-1 rounded-lg text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* 原始邮件 */}
       <Card padding="lg">
