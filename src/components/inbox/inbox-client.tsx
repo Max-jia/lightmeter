@@ -126,7 +126,7 @@ export function InboxClient() {
 
   // 邮件详情视图
   if (selectedEmail) {
-    return <InboxDetailView email={selectedEmail} onBack={() => setSelectedEmail(null)} onRefresh={fetchEmails} />;
+    return <InboxDetailView email={selectedEmail} onBack={() => setSelectedEmail(null)} onRefresh={fetchEmails} onDelete={(id) => setEmails(prev => prev.filter(e => e.id !== id))} />;
   }
 
   // 收件箱列表
@@ -240,10 +240,12 @@ function InboxDetailView({
   email,
   onBack,
   onRefresh,
+  onDelete,
 }: {
   email: Email;
   onBack: () => void;
   onRefresh: () => void;
+  onDelete: (id: string) => void;
 }) {
   const { call, loading: apiLoading } = useApi<any>();
   const [isEditing, setIsEditing] = useState(false);
@@ -256,7 +258,7 @@ function InboxDetailView({
   const handleDelete = async () => {
     setDeleting(true);
     await call("/api/emails/delete", { method: "POST", body: JSON.stringify({ emailId: email.id }) });
-    onRefresh();
+    onDelete(email.id);
     onBack();
   };
 
