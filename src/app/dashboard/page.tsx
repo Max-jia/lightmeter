@@ -132,7 +132,7 @@ export default async function DashboardHome() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-heading font-semibold tracking-tight" style={{ fontFamily: "var(--font-space-grotesk)" }}>
-            Good morning{displayName ? `, ${displayName.split(" ")[0]}` : ""}
+            {(() => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"; })()}{displayName ? `, ${displayName.split(" ")[0]}` : ""}
           </h1>
           <p className="text-sm text-[var(--color-text-secondary)] mt-1">
             {stats?.draftsReady > 0
