@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge, Avatar } from "@/components/ui/misc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, X, Pencil, Check } from "lucide-react";
+import { Plus, X, Pencil, Check, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
 const EVENT_TYPES = ["wedding", "portrait", "event", "engagement", "other"] as const;
@@ -25,6 +25,9 @@ export default function ClientsPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<ClientForm>({...EMPTY_FORM});
   const [contactMenuOpen, setContactMenuOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
   const [celebrateId, setCelebrateId] = useState<string | null>(null);
 
   const loadClients = () => {
@@ -77,6 +80,17 @@ export default function ClientsPage() {
     setShowModal(false); setSaving(false); loadClients();
   };
 
+  const openTimeline = async (c: any) => {
+    setSelectedClient(c);
+    setTimelineLoading(true);
+    const res = await fetch(`/api/clients/timeline?id=${c.id}`);
+    if (res.ok) {
+      const data = await res.json();
+      setTimeline(data.events || []);
+    }
+    setTimelineLoading(false);
+  };
+
   const markCompleted = async (c: any) => {
     setCelebrateId(c.id);
     await fetch("/api/clients", {
@@ -113,7 +127,86 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      {displayedClients.length === 0 ? (
+      {/* 客户时间线详情面板 */}
+      {selectedClient && (
+        <div className="space-y-4">
+          <button onClick={() => { setSelectedClient(null); setTimeline([]); }} className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to clients
+          </button>
+
+          <Card padding="lg">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Avatar name={selectedClient.name} size="lg" />
+                <div>
+                  <h2 className="text-lg font-heading font-semibold">{selectedClient.name}</h2>
+                  <div className="flex items-center gap-2 mt-0.5 text-xs text-[var(--color-text-secondary)]">
+                    {selectedClient.email && <span>{selectedClient.email}</span>}
+                    {selectedClient.phone && <span>· {selectedClient.phone}</span>}
+                    {selectedClient.instagram && <span>· @{selectedClient.instagram}</span>}
+                    {selectedClient.whatsapp && <span>· WA: {selectedClient.whatsapp}</span>}
+                  </div>
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => openEdit(selectedClient)}><Pencil className="w-4 h-4 mr-1.5" />Edit</Button>
+            </div>
+
+            {/* 拍摄信息卡片 */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              {selectedClient.event_type && (
+                <div className="p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                  <p className="text-xs text-[var(--color-text-disabled)]">Type</p>
+                  <p className="text-sm font-medium capitalize">{selectedClient.event_type}</p>
+                </div>
+              )}
+              {selectedClient.event_date && (
+                <div className="p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                  <p className="text-xs text-[var(--color-text-disabled)]">Shoot date</p>
+                  <p className="text-sm font-medium">{selectedClient.event_date}</p>
+                </div>
+              )}
+              {selectedClient.location && (
+                <div className="p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                  <p className="text-xs text-[var(--color-text-disabled)]">Location</p>
+                  <p className="text-sm font-medium truncate">{selectedClient.location}</p>
+                </div>
+              )}
+              {selectedClient.budget && (
+                <div className="p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                  <p className="text-xs text-[var(--color-text-disabled)]">Budget</p>
+                  <p className="text-sm font-medium">${selectedClient.budget}</p>
+                </div>
+              )}
+            </div>
+
+            {/* 时间线 */}
+            <h3 className="text-sm font-heading font-semibold mb-3">Activity Timeline</h3>
+            {timelineLoading ? (
+              <div className="space-y-3">
+                {[1,2,3].map(i => <div key={i} className="h-12 animate-shimmer rounded-xl bg-[var(--color-bg-elevated)]" />)}
+              </div>
+            ) : timeline.length === 0 ? (
+              <p className="text-sm text-[var(--color-text-secondary)] py-4 text-center">No activity yet for this client.</p>
+            ) : (
+              <div className="relative pl-6 border-l-2 border-[var(--color-border-subtle)] space-y-4">
+                {timeline.map((evt, i) => (
+                  <div key={i} className="relative">
+                    <div className="absolute -left-[25px] top-1 w-3 h-3 rounded-full bg-[var(--color-bg-surface)] border-2 border-[var(--color-gold)]" />
+                    <p className="text-xs text-[var(--color-text-disabled)]">{evt.timestamp ? new Date(evt.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""}</p>
+                    <p className="text-sm font-medium">{evt.title}</p>
+                    <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
+                      <span>{evt.sub}</span>
+                      {evt.detail && <span>· {evt.detail}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
+
+      {!selectedClient && displayedClients.length === 0 ? (
         <Card padding="lg" className="text-center py-12 space-y-3">
           <p className="text-sm text-[var(--color-text-secondary)]">{tab === "upcoming" ? "No upcoming clients." : "No completed clients."}</p>
           <p className="text-xs text-[var(--color-text-disabled)]">{tab === "upcoming" ? "Add your first client or connect Gmail." : "Mark clients as complete to see them here."}</p>
@@ -125,7 +218,7 @@ export default function ClientsPage() {
             const isNearest = tab === "upcoming" && nearestUpcoming && c.id === nearestUpcoming.id;
             const isCelebrating = celebrateId === c.id;
             return (
-              <Card key={c.id} padding="md" className={`group relative overflow-hidden transition-all duration-300 ${isCelebrating ? "celebrate-card" : ""} ${isNearest ? "!border-[var(--color-gold)]/50 shadow-[0_0_20px_rgba(212,160,69,0.15)]" : ""}`}>
+              <Card key={c.id} padding="md" onClick={() => openTimeline(c)} className={`cursor-pointer group relative overflow-hidden transition-all duration-300 ${isCelebrating ? "celebrate-card" : ""} ${isNearest ? "!border-[var(--color-gold)]/50 shadow-[0_0_20px_rgba(212,160,69,0.15)]" : ""}`}>
                 {/* Celebration stars */}
                 {isCelebrating && (
                   <div className="absolute inset-0 pointer-events-none z-10">
