@@ -243,9 +243,10 @@ function InboxDetailView({
   const [isEditing, setIsEditing] = useState(false);
   const [editedBody, setEditedBody] = useState(email.ai_draft_body || "");
   const [editedSubject, setEditedSubject] = useState(email.ai_draft_subject || `Re: ${email.subject}`);
-  const [sent, setSent] = useState(email.status === "sent");
+  const [sendState, setSendState] = useState<"idle" | "sending" | "sent">(email.status === "sent" ? "sent" : "idle");
 
   const handleSend = async () => {
+    setSendState("sending");
     const result = await call("/api/emails/send", {
       method: "POST",
       body: JSON.stringify({
@@ -255,8 +256,11 @@ function InboxDetailView({
       }),
     });
     if (result?.success) {
-      setSent(true);
+      setSendState("sent");
       onRefresh();
+      setTimeout(() => onBack(), 2000);
+    } else {
+      setSendState("idle");
     }
   };
 
@@ -314,13 +318,13 @@ function InboxDetailView({
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[var(--color-gold)]" />
               <h3 className="text-sm font-heading font-semibold">
-                {sent ? "Sent" : "AI Drafted Reply"}
+                {sendState === "sent" ? "Sent" : "AI Drafted Reply"}
               </h3>
-              {!sent && email.ai_confidence && email.ai_confidence >= 90 && (
+              {sendState !== "sent" && email.ai_confidence && email.ai_confidence >= 90 && (
                 <Badge variant="success"><Check className="w-3 h-3 mr-0.5" />Ready to send</Badge>
               )}
             </div>
-            {!sent && (
+            {sendState !== "sent" && (
               <div className="flex items-center gap-2">
                 {!isEditing ? (
                   <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
@@ -352,12 +356,33 @@ function InboxDetailView({
             </div>
           )}
 
-          {!sent && (
+          {/* 发送中 / 成功 / 正常按钮 */}
+          {sendState === "sent" ? (
+            <div className="send-success-exit mt-4 p-6 rounded-xl bg-[var(--color-success-bg)] border border-[var(--color-success)]/30 text-center">
+              <div className="send-success-check w-14 h-14 mx-auto mb-3 rounded-full bg-[var(--color-success)] flex items-center justify-center">
+                <Check className="w-7 h-7 text-white" />
+              </div>
+              <p className="text-base font-semibold text-[var(--color-success)]">Reply sent!</p>
+              <p className="text-xs text-[var(--color-text-secondary)] mt-1">Returning to inbox…</p>
+            </div>
+          ) : sendState === "sending" ? (
+            <div className="mt-4 p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] flex items-center justify-center gap-3">
+              <div className="relative w-10 h-10 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-2 border-[var(--color-gold)]/20" />
+                <div className="absolute inset-0 rounded-full border-2 border-t-[var(--color-gold)] animate-spin" />
+                <span className="envelope-fly absolute text-lg">✉️</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Sending reply…</p>
+                <p className="text-xs text-[var(--color-text-secondary)]">Please wait a moment</p>
+              </div>
+            </div>
+          ) : (
             <div className="flex items-center justify-between mt-4">
               <p className="text-xs text-[var(--color-text-disabled)]">
                 Confidence: {email.ai_confidence || "?"}%
               </p>
-              <Button size="md" variant="gold" loading={apiLoading} onClick={handleSend} disabled={!editedBody}>
+              <Button size="md" variant="gold" onClick={handleSend} disabled={!editedBody}>
                 <Send className="w-4 h-4 mr-2" />
                 Send Reply
               </Button>
