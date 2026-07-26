@@ -68,7 +68,7 @@ export async function fetchRecentEmails(accessToken: string, maxResults = 20) {
 
   const listResponse = await gmail.users.messages.list({
     userId: "me",
-    q: "in:inbox -category:promotions -category:social",
+    q: "in:inbox",
     maxResults,
   });
 
