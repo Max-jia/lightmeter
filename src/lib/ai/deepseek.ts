@@ -68,11 +68,10 @@ Body: ${body.slice(0, 2000)}`;
     model: MODEL,
     messages: [{ role: "user", content: prompt }],
     temperature: 0.1,
-    max_tokens: 200,
+    max_tokens: 500, // v4-pro 推理 token 和输出 token 共享配额，需留足空间
   });
 
   const text = response.choices[0]?.message?.content || "{}";
-  // 提取 JSON（可能被包裹在 markdown 代码块中）
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   return JSON.parse(jsonMatch?.[0] || "{}");
 }
