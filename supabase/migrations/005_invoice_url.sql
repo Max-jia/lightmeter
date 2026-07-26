@@ -1,0 +1,2 @@
+-- 不需要加列，按需生成即可。此文件留空。
+-- 发票通过 GET /api/invoices/{paymentId} 实时生成 PDF。

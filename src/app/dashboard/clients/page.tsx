@@ -197,6 +197,9 @@ export default function ClientsPage() {
                     <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
                       <span>{evt.sub}</span>
                       {evt.detail && <span>· {evt.detail}</span>}
+                      {evt.type === "payment" && evt.link && (
+                        <a href={evt.link} className="text-[var(--color-gold)] hover:underline ml-1">📄 Invoice</a>
+                      )}
                     </div>
                   </div>
                 ))}

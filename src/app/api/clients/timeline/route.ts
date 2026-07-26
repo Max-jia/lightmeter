@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   const [emailsRes, linksRes, paymentsRes] = await Promise.all([
     supabase.from("emails").select("id, subject, from_address, status, ai_classification, received_at").eq("user_id", userData.user.id).or(client.email ? `client_id.eq.${clientId},from_address.ilike.%${client.email}%` : `client_id.eq.${clientId}`).order("received_at", { ascending: false }).limit(50),
     supabase.from("links").select("id, slug, proposal_title, proposal_amount, status, contract_signed_at, created_at").eq("user_id", userData.user.id).eq("client_id", clientId).order("created_at", { ascending: false }).limit(50),
-    supabase.from("payments").select("id, amount, status, description, paid_at, link_id").eq("user_id", userData.user.id).eq("client_id", clientId).order("paid_at", { ascending: false }).limit(50),
+    supabase.from("payments").select("id, amount, status, description, paid_at, link_id").eq("user_id", userData.user.id).eq("client_id", clientId).eq("status", "completed").order("paid_at", { ascending: false }).limit(50),
   ]);
 
   const events: any[] = [];
@@ -62,10 +62,12 @@ export async function GET(request: Request) {
   for (const p of paymentsRes.data || []) {
     events.push({
       type: "payment",
+      id: p.id,
       title: p.description || "Payment",
       detail: p.amount ? `$${(p.amount / 100).toLocaleString()}` : "",
       timestamp: p.paid_at || p.created_at,
-      sub: p.status === "completed" ? "💰 Paid" : `💰 ${p.status}`,
+      sub: "💰 Paid",
+      link: `/api/invoices/${p.id}`,
     });
   }
 
