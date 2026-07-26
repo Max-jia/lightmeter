@@ -66,7 +66,7 @@ export default function LinksPage() {
       } else {
         toast.success("Link created!");
         if (saveAsTemplate && templateName.trim()) {
-          await fetch("/api/links/templates", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: templateName.trim(), proposal_amount: Math.round(parseFloat(amount) * 100), proposal_description: description, contract_template: contractTemplate }) });
+          await fetch("/api/links/templates", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: templateName.trim(), proposal_amount: Math.round(parseFloat(amount) * 100), proposal_description: description }) });
           toast.success("Template saved!");
         }
         setShowModal(false);
@@ -155,7 +155,7 @@ export default function LinksPage() {
             {templates.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {templates.map((tpl) => (
-                  <button key={tpl.id} type="button" onClick={() => { setAmount(tpl.proposal_amount ? String(tpl.proposal_amount / 100) : ""); setDescription(tpl.proposal_description || ""); setContractTemplate(tpl.contract_template || ""); if (tpl.contract_template) setShowContractPreview(true); }}
+                  <button key={tpl.id} type="button" onClick={() => { setAmount(tpl.proposal_amount ? String(tpl.proposal_amount / 100) : ""); setDescription(tpl.proposal_description || ""); }}
                     className="px-3 py-1.5 rounded-lg text-xs bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] hover:border-[var(--color-gold)]/50 hover:text-[var(--color-gold)] transition-all"
                   >{tpl.name}</button>
                 ))}
