@@ -104,20 +104,25 @@ export async function GET() {
             status: "draft_ready",
           }).eq("id", inserted.id);
 
-          // 自动创建客户记录
+          // 自动创建/关联客户记录
           if (extractedInfo.name) {
+            let clientId: string | null = null;
+
+            // 用纯邮箱（非全名）匹配已有客户
             const { data: existingClient } = await supabase
               .from("clients")
               .select("id")
               .eq("user_id", userData.user.id)
-              .eq("email", email.from)
+              .eq("email", email.fromEmail)
               .maybeSingle();
 
-            if (!existingClient) {
-              await supabase.from("clients").insert({
+            if (existingClient) {
+              clientId = existingClient.id;
+            } else {
+              const { data: newClient } = await supabase.from("clients").insert({
                 user_id: userData.user.id,
                 name: extractedInfo.name,
-                email: email.from,
+                email: email.fromEmail,
                 partner_name: extractedInfo.partnerName,
                 event_type: extractedInfo.eventType || "other",
                 event_date: extractedInfo.weddingDate || null,
@@ -125,7 +130,14 @@ export async function GET() {
                 budget: extractedInfo.budget,
                 referral_source: extractedInfo.referralSource,
                 status: "lead",
-              });
+              }).select("id").single();
+
+              if (newClient) clientId = newClient.id;
+            }
+
+            // 回填 client_id 到邮件
+            if (clientId) {
+              await supabase.from("emails").update({ client_id: clientId }).eq("id", inserted.id);
             }
           }
 

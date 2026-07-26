@@ -86,6 +86,7 @@ export async function fetchRecentEmails(accessToken: string, maxResults = 20) {
     const subject =
       headers.find((h) => h.name === "Subject")?.value || "(no subject)";
     const from = headers.find((h) => h.name === "From")?.value || "";
+    const fromEmail = (from.match(/<([^>]+)>/) || [null, from])[1].trim().toLowerCase();
     const date = headers.find((h) => h.name === "Date")?.value || "";
 
     let body = "";
@@ -105,6 +106,7 @@ export async function fetchRecentEmails(accessToken: string, maxResults = 20) {
       threadId: detail.data.threadId,
       subject,
       from,
+      fromEmail,
       date,
       body: body.slice(0, 5000),
       snippet: detail.data.snippet || "",
