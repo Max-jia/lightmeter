@@ -4,7 +4,7 @@ import OpenAI from "openai";
  * DeepSeek AI 客户端
  * DeepSeek API 兼容 OpenAI SDK，只需改 baseURL 和 apiKey
  */
-const MODEL = "deepseek-chat";
+const MODEL = "deepseek-v4-pro";
 
 /** 懒加载 DeepSeek 客户端，避免构建时缺少环境变量报错 */
 function getClient() {
