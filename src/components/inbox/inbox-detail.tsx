@@ -76,11 +76,12 @@ export function InboxDetail({
 
   const handleSend = () => {
     setIsSending(true);
-    // 模拟发送（正式版调用 Gmail API）
     setTimeout(() => {
-      setSent(true);
       setIsSending(false);
-    }, 1000);
+      setSent(true);
+      // 自动返回列表
+      setTimeout(() => onBack(), 2000);
+    }, 1200);
   };
 
   return (
@@ -242,8 +243,32 @@ export function InboxDetail({
           </div>
         )}
 
-        {/* 发送按钮 */}
-        {!sent ? (
+        {/* 发送按钮 / 发送中 / 成功 */}
+        {sent ? (
+          <div className="send-success-exit flex items-center justify-center mt-4 p-6 rounded-xl bg-[var(--color-success-bg)] border border-[var(--color-success)]/30">
+            <div className="text-center">
+              <div className="send-success-check w-14 h-14 mx-auto mb-3 rounded-full bg-[var(--color-success)] flex items-center justify-center">
+                <Check className="w-7 h-7 text-white" />
+              </div>
+              <p className="text-base font-semibold text-[var(--color-success)]">Reply sent!</p>
+              <p className="text-xs text-[var(--color-text-secondary)] mt-1">Returning to inbox…</p>
+            </div>
+          </div>
+        ) : isSending ? (
+          <div className="flex items-center justify-center mt-4 p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+            <div className="flex items-center gap-3">
+              <div className="relative w-10 h-10 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-2 border-[var(--color-gold)]/20" />
+                <div className="absolute inset-0 rounded-full border-2 border-t-[var(--color-gold)] animate-spin" />
+                <span className="envelope-fly absolute text-lg">✉️</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-[var(--color-text-primary)]">Sending reply…</p>
+                <p className="text-xs text-[var(--color-text-secondary)]">Please wait a moment</p>
+              </div>
+            </div>
+          </div>
+        ) : (
           <div className="flex items-center justify-between mt-4">
             <p className="text-xs text-[var(--color-text-disabled)]">
               Confidence: {aiReply.confidence}% —{" "}
@@ -253,19 +278,11 @@ export function InboxDetail({
             </p>
             <Button
               size="md"
-              loading={isSending}
               onClick={handleSend}
             >
               <Send className="w-4 h-4 mr-2" />
               Send Reply
             </Button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 mt-4 p-3 rounded-lg bg-green-950/30 border border-green-800/50">
-            <Check className="w-4 h-4 text-green-400" />
-            <p className="text-sm text-green-300">
-              Reply sent to {email.fromName}!
-            </p>
           </div>
         )}
       </Card>

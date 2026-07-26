@@ -103,12 +103,21 @@ export function InboxClient() {
     );
   }
 
-  // 加载中
-  if (gmailConnected === null || fetching) {
+  // 初始加载 — 骨架邮件卡片
+  if (gmailConnected === null && !fetching) {
     return (
       <div className="space-y-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-20 w-full" />
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="inbox-skeleton-card p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)]" style={{ animationDelay: `${i * 0.1}s` }}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[var(--color-bg-elevated)]" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 w-32 rounded bg-[var(--color-bg-elevated)]" />
+                <div className="h-2.5 w-48 rounded bg-[var(--color-bg-elevated)]" />
+              </div>
+              <div className="h-2 w-12 rounded bg-[var(--color-bg-elevated)]" />
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -143,10 +152,18 @@ export function InboxClient() {
           )}
         </div>
         <Button variant="ghost" size="sm" onClick={fetchEmails} loading={fetching}>
-          <RefreshCw className="w-4 h-4 mr-1.5" />
+          <RefreshCw className={`w-4 h-4 mr-1.5 ${fetching ? "animate-spin" : ""}`} />
           Refresh
         </Button>
       </div>
+
+      {/* Gmail 同步状态条 */}
+      {fetching && (
+        <div className="sync-bar flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-gold-subtle)] border border-[var(--color-gold)]/20">
+          <div className="w-4 h-4 border-2 border-[var(--color-gold)] border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-[var(--color-gold)]">Syncing with Gmail…</span>
+        </div>
+      )}
 
       {/* 邮件列表 */}
       {emails.length === 0 ? (
