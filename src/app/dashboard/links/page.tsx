@@ -22,12 +22,16 @@ export default function LinksPage() {
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [showContractPreview, setShowContractPreview] = useState(false);
   const [studioName, setStudioName] = useState("My Photo Studio");
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [saveAsTemplate, setSaveAsTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState("");
 
   useEffect(() => {
     loadLinks();
     fetch("/api/profile").then(r => r.json()).then(d => {
       if (d.studio_name) setStudioName(d.studio_name);
     });
+    fetch("/api/links/templates").then(r => r.json()).then(d => setTemplates(d.templates || []));
   }, []);
 
   const loadLinks = () => {
@@ -61,13 +65,14 @@ export default function LinksPage() {
         toast.error(data.error);
       } else {
         toast.success("Link created!");
+        if (saveAsTemplate && templateName.trim()) {
+          await fetch("/api/links/templates", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: templateName.trim(), proposal_amount: Math.round(parseFloat(amount) * 100), proposal_description: description, contract_template: contractTemplate }) });
+          toast.success("Template saved!");
+        }
         setShowModal(false);
-        setClientName("");
-        setAmount("");
-        setDescription("");
-        setContractTemplate("");
-        setSelectedTemplate("");
-        setShowContractPreview(false);
+        setClientName(""); setAmount(""); setDescription(""); setContractTemplate("");
+        setSelectedTemplate(""); setShowContractPreview(false);
+        setSaveAsTemplate(false); setTemplateName("");
         loadLinks();
       }
     } catch {
@@ -146,6 +151,16 @@ export default function LinksPage() {
               <h2 className="text-lg font-heading font-semibold">New Link</h2>
               <button onClick={() => setShowModal(false)} className="p-1 rounded-lg hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-disabled)]"><X className="w-5 h-5" /></button>
             </div>
+            {/* 已保存的提案模板 */}
+            {templates.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {templates.map((tpl) => (
+                  <button key={tpl.id} type="button" onClick={() => { setClientName(""); setAmount(tpl.proposal_amount ? String(tpl.proposal_amount / 100) : ""); setDescription(tpl.proposal_description || ""); setContractTemplate(tpl.contract_template || ""); if (tpl.contract_template) setShowContractPreview(true); }}
+                    className="px-3 py-1.5 rounded-lg text-xs bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] hover:border-[var(--color-gold)]/50 hover:text-[var(--color-gold)] transition-all"
+                  >{tpl.name}</button>
+                ))}
+              </div>
+            )}
             <Input label="Client name" value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Sarah Johnson" />
             <Input label="Amount (USD)" prefix="$" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="500" helperText="Total proposal amount" />
             <Input label="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Wedding Photography Package" />
@@ -196,6 +211,16 @@ export default function LinksPage() {
                     placeholder="Paste or edit your contract terms here..."
                   />
                 </div>
+              )}
+            </div>
+            {/* 保存为模板 */}
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={saveAsTemplate} onChange={e => setSaveAsTemplate(e.target.checked)} className="w-4 h-4 rounded accent-[var(--color-gold)]" />
+                <span className="text-xs text-[var(--color-text-secondary)]">Save as template</span>
+              </label>
+              {saveAsTemplate && (
+                <input type="text" value={templateName} onChange={e => setTemplateName(e.target.value)} placeholder="Template name" className="flex-1 px-2.5 py-1.5 rounded-lg text-xs bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-gold)]" />
               )}
             </div>
             <Button variant="gold" className="w-full" loading={creating} onClick={handleCreate}>
