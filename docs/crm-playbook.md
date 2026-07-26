@@ -459,3 +459,136 @@ customer.subscription.deleted
 | 2026-07 | 客户端联系用 4 个 TEXT 列而非 JSONB | JSONB 难筛选，TEXT 简单直接 |
 | 2026-07 | Apple 弹簧动效 | 线性动效太僵硬，弹跳过猛不专业 |
 | 2026-07 | `profiles.full_name` 作为名字来源 | 只读 `user_metadata` 导致修改不生效 |
+| 2026-07 | DeepSeek v4-pro 替代 v3 (`deepseek-chat`) | v3 模型名已废弃，API 拒绝所有请求 |
+| 2026-07 | Inbox 进入时不自动拉 Gmail | 每页都同步会导致 5-10 秒白屏 |
+| 2026-07 | 邮件 AI 失败不卡 `unread` | 失败标记 `read`，配合 `/api/emails/process-batch` 批量重试 |
+| 2026-07 | Timeline 用 `from_address.ilike` 模糊匹配 | 精确匹配 `sara <email>` vs `email` 永远对不上 |
+
+---
+
+## 9. 邮件系统深度设计
+
+### 9.1 邮件生命周期
+
+```
+Gmail → fetch (status=unread) → AI classify:
+  ├─ new_inquiry → extract info + generate reply → draft_ready
+  ├─ client_reply → status=read（不产生草稿）
+  ├─ spam → status=archived（隐藏）
+  └─ unknown/AI失败 → status=read（避免永久卡 unread）
+```
+
+### 9.2 三个关键 API
+
+| API | 用途 | 触发方式 |
+|-----|------|---------|
+| `/api/emails/fetch` | 从 Gmail 拉取 + AI 处理 | 用户手动点 Refresh |
+| `/api/emails/list` | 从数据库取已处理邮件 | 进入 Inbox 自动调用 |
+| `/api/emails/process-batch` | 批量重新处理卡住的 unread | 手动或定期调用 |
+
+### 9.3 进入 Inbox 的正确做法
+
+```
+❌ 进入 Inbox → fetch（5-10 秒）→ 才显示
+✅ 进入 Inbox → list（毫秒）→ 立即显示 → 用户点 Refresh 才 fetch
+```
+
+### 9.4 Inbox 展示优化
+
+用 Tab 分组而非平铺全量：
+- **Drafts**（draft_ready）：待审核发送
+- **Unread**（unread）：新邮件待处理
+- **All**：全部
+
+每个 Tab 显示计数。数据来自前端 `emails.filter()`，不需要额外 API。
+
+### 9.5 DeepSeek v4-pro 特有的坑
+
+| 问题 | 原因 | 修复 |
+|------|------|------|
+| `deepseek-chat` 模型名报错 | API 已迁移到 `deepseek-v4-pro` | 改模型名 |
+| AI 分类偶尔返回空 | v4-pro 的 `reasoning_content` 和 `content` 共享 `max_tokens`，推理用完配额输出为空 | `max_tokens` 从 200 提到 500 |
+
+### 9.6 邮件-客户关联
+
+邮件的 `from_address` 格式为 `"Name <email@example.com>"`，客户邮箱存的是纯地址 `email@example.com`。
+
+- ✅ 写库时从 `From` header 提取纯邮箱 (`/(?<=<)([^>]+)/`)
+- ✅ 匹配客户时用纯邮箱，不用全名
+- ✅ 创建/关联客户后，回填 `emails.client_id`
+- ✅ Timeline 查询用 `from_address.ilike.%email%`，兼容旧数据
+
+---
+
+## 10. 客户管理增强
+
+### 10.1 列表排序与高亮
+
+- 按 `event_date` 升序（最近的拍摄在最上面）
+- 最近的那个客户显示「Next up」标签 + 金色边框高亮
+
+### 10.2 Upcoming / Completed 双 Tab
+
+- **Upcoming**：所有非 completed/archived 的客户
+- **Completed**：标记完成或已归档
+- 切换逻辑纯前端 `filter()`，不额外请求
+
+### 10.3 Mark Complete 动效
+
+- 点击 ✓ → 金色星星动画（0.6 秒）→ 卡片淡出消失
+- 自动从 Upcoming 列表移除，出现在 Completed tab
+- Dashboard 和 Calendar 同步排除（数据库实时查）
+
+### 10.4 客户沟通时间线
+
+点客户卡片 → 详情面板显示该客户的所有互动：
+- 邮件往来（`emails` 表）
+- 提案链接（`links` 表）
+- 付款记录（`payments` 表）
+- 客户创建时间
+
+API 聚合三张表，按时间降序排列，一条 SQL 并行查询。
+
+### 10.5 联系方式动态表单
+
+默认显示 `Email` 输入框。点击「+」可添加 `Phone`、`Instagram`、`WhatsApp`。每个字段可单独删除。
+
+数据库用 4 个 TEXT 列（非 JSONB），前端用一个 `contacts` 对象映射。
+
+---
+
+## 11. Dashboard 增强
+
+### 11.1 快捷操作面板
+
+Dashboard 顶部 4 个卡片，一目了然：
+- Unread inbox（`emails.status = "unread"`）
+- Proposals pending（`links.status IN ("pending","viewed")`）
+- Shoots this week（`clients.event_date` 在 7 天内）
+- Drafts to review（`emails.status = "draft_ready"`）
+
+每个卡片可点击跳转到对应页面。
+
+### 11.2 试用横幅
+
+Dashboard 顶部固定横幅：
+- 试用期内：`X days left in your free trial. Upgrade now →`
+- 试用过期：`Your free trial has ended. Subscribe now →`
+
+只在 `trialActive && !hasSubscription` 时显示。有订阅的用户看不到。
+
+### 11.3 欢迎语
+
+用 `"Hello, {firstName}"` 替代时间相关的 `"Good morning/afternoon"`。服务端渲染无法获取用户时区，time-based greeting 不准确。
+
+---
+
+## 12. 决策日志（续）
+
+| 日期 | 决策 | 讨论过的替代方案 |
+|------|------|----------------|
+| 2026-07 | DeepSeek v4-pro | v3 已废弃，API 报错才发现 |
+| 2026-07 | 邮件 Tab 分组 | 平铺 + 无限滚动（太复杂） |
+| 2026-07 | `from_address.ilike` 匹配 | `from_address.eq` 精确匹配（会漏数据） |
+| 2026-07 | Hello 替代 Good morning | 服务端时区 ≠ 用户时区 |
+| 2026-07 | AI 失败 → `status=read` | 保持 `unread`（卡住用户无法清理） |
