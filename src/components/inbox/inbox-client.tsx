@@ -35,6 +35,7 @@ export function InboxClient() {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [gmailConnected, setGmailConnected] = useState<boolean | null>(null);
   const [fetching, setFetching] = useState(false);
+  const [inboxTab, setInboxTab] = useState<"drafts" | "unread" | "all">("drafts");
 
   // 加载已有邮件（快速展示）
   const loadEmails = useCallback(async () => {
@@ -129,7 +130,6 @@ export function InboxClient() {
   }
 
   // 收件箱列表
-  const [inboxTab, setInboxTab] = useState<"drafts" | "unread" | "all">("drafts");
   const draftsReady = emails.filter((e) => e.status === "draft_ready");
   const unreadEmails = emails.filter((e) => e.status === "unread");
   const filteredEmails = inboxTab === "drafts" ? draftsReady : inboxTab === "unread" ? unreadEmails : emails;
