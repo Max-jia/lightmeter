@@ -18,6 +18,10 @@ export default function PublicLinkPage() {
   const [signName, setSignName] = useState("");
   const [signing, setSigning] = useState(false);
   const [signed, setSigned] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+
+  const hasContract = link?.contract_template;
+  const canPay = hasContract ? signed : agreed;
 
   useEffect(() => {
     if (slug) {
@@ -80,37 +84,43 @@ export default function PublicLinkPage() {
           <h1 className="text-xl font-heading font-semibold" style={{ fontFamily: "var(--font-space-grotesk)" }}>{link.proposal_title}</h1>
         </div>
 
-        {/* Step 1: Contract */}
-        <Card depth={2} padding="lg">
-          <div className="flex items-center gap-2 mb-4">
-            <PenLine className="w-4 h-4 text-[var(--color-gold)]" />
-            <h2 className="text-sm font-heading font-semibold">Contract</h2>
-          </div>
-          {link.contract_template ? (
+        {/* Step 1: Contract (only if present) */}
+        {hasContract && (
+          <Card depth={2} padding="lg">
+            <div className="flex items-center gap-2 mb-4">
+              <PenLine className="w-4 h-4 text-[var(--color-gold)]" />
+              <h2 className="text-sm font-heading font-semibold">Contract</h2>
+            </div>
             <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-sm text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap mb-4 max-h-48 overflow-y-auto">
               {link.contract_template}
             </div>
-          ) : (
-            <p className="text-sm text-[var(--color-text-secondary)] mb-4">By signing, you agree to the photography services outlined in this proposal.</p>
-          )}
-          {signed ? (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--color-success-bg)] border border-[var(--color-success)]/20">
-              <Check className="w-5 h-5 text-[var(--color-success)]" />
-              <div>
-                <p className="text-sm font-medium text-[var(--color-success)]">Signed by {link.contract_signed_by || "Client"}</p>
-                <p className="text-xs text-[var(--color-text-disabled)]">{link.contract_signed_at ? new Date(link.contract_signed_at).toLocaleString() : ""}</p>
+            {signed ? (
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--color-success-bg)] border border-[var(--color-success)]/20">
+                <Check className="w-5 h-5 text-[var(--color-success)]" />
+                <div>
+                  <p className="text-sm font-medium text-[var(--color-success)]">Signed by {link.contract_signed_by || "Client"}</p>
+                  <p className="text-xs text-[var(--color-text-disabled)]">{link.contract_signed_at ? new Date(link.contract_signed_at).toLocaleString() : ""}</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <Input label="Your full name" value={signName} onChange={(e) => setSignName(e.target.value)} placeholder="Jane Smith" />
-              <Button variant="gold" className="w-full" loading={signing} onClick={handleSign} disabled={!signName.trim()}>
-                Sign Contract
-              </Button>
-              <p className="text-xs text-[var(--color-text-disabled)] text-center">By signing, you agree to the terms above.</p>
-            </div>
-          )}
-        </Card>
+            ) : (
+              <div className="space-y-3">
+                <Input label="Your full name" value={signName} onChange={(e) => setSignName(e.target.value)} placeholder="Jane Smith" />
+                <Button variant="gold" className="w-full" loading={signing} onClick={handleSign} disabled={!signName.trim()}>
+                  Sign Contract
+                </Button>
+                <p className="text-xs text-[var(--color-text-disabled)] text-center">By signing, you agree to the terms above.</p>
+              </div>
+            )}
+          </Card>
+        )}
+
+        {/* Agreement checkbox (when no contract) */}
+        {!hasContract && (
+          <label className="flex items-start gap-3 p-4 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)] cursor-pointer">
+            <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 rounded accent-[var(--color-gold)]" />
+            <span className="text-sm text-[var(--color-text-secondary)]">I agree to the photography services and pricing outlined in this proposal.</span>
+          </label>
+        )}
 
         {/* Step 2: Payment */}
         <Card depth={2} padding="lg">
@@ -127,8 +137,8 @@ export default function PublicLinkPage() {
           ))}
         </div>
 
-        <Button variant="gold" size="lg" className="w-full" loading={paying} onClick={handlePay} disabled={!signed}>
-          {!signed ? "Sign contract first" : `Pay ${amount} with Card`}
+        <Button variant="gold" size="lg" className="w-full" loading={paying} onClick={handlePay} disabled={!canPay}>
+          {!canPay ? (hasContract ? "Sign contract first" : "Agree to continue") : `Pay ${amount} with Card`}
         </Button>
 
         <div className="flex items-center gap-2 justify-center text-xs text-[var(--color-text-disabled)]"><Shield className="w-3 h-3" />Secured by Stripe</div>
