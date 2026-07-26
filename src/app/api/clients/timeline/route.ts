@@ -28,7 +28,7 @@ export async function GET(request: Request) {
 
   // 并行查询三张表
   const [emailsRes, linksRes, paymentsRes] = await Promise.all([
-    supabase.from("emails").select("id, subject, from_address, status, ai_classification, received_at").eq("user_id", userData.user.id).or(`client_id.eq.${clientId},from_address.eq.${client.email}`).order("received_at", { ascending: false }).limit(50),
+    supabase.from("emails").select("id, subject, from_address, status, ai_classification, received_at").eq("user_id", userData.user.id).or(client.email ? `client_id.eq.${clientId},from_address.ilike.%${client.email}%` : `client_id.eq.${clientId}`).order("received_at", { ascending: false }).limit(50),
     supabase.from("links").select("id, slug, proposal_title, proposal_amount, status, contract_signed_at, created_at").eq("user_id", userData.user.id).eq("client_id", clientId).order("created_at", { ascending: false }).limit(50),
     supabase.from("payments").select("id, amount, status, description, paid_at, link_id").eq("user_id", userData.user.id).eq("client_id", clientId).order("paid_at", { ascending: false }).limit(50),
   ]);
