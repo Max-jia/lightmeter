@@ -129,27 +129,33 @@ export function InboxClient() {
   }
 
   // 收件箱列表
-  const draftsReady = emails.filter((e) => e.status === "draft_ready").length;
-  const unread = emails.filter((e) => e.status === "unread").length;
+  const [inboxTab, setInboxTab] = useState<"drafts" | "unread" | "all">("drafts");
+  const draftsReady = emails.filter((e) => e.status === "draft_ready");
+  const unreadEmails = emails.filter((e) => e.status === "unread");
+  const filteredEmails = inboxTab === "drafts" ? draftsReady : inboxTab === "unread" ? unreadEmails : emails;
 
   return (
     <div className="space-y-3">
-      {/* 操作栏 */}
+      {/* 操作栏 + Tabs */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 text-sm">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)]">
-            <Sparkles className="w-4 h-4 text-[var(--color-gold)]" />
-            <span className="text-[var(--color-text-secondary)]">
-              <span className="text-[var(--color-text-primary)] font-medium">{draftsReady}</span> drafts ready
-            </span>
-          </div>
-          {unread > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)]">
-              <span className="text-[var(--color-text-secondary)]">
-                <span className="text-[var(--color-text-primary)] font-medium">{unread}</span> unread
-              </span>
-            </div>
-          )}
+        <div className="flex rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] p-0.5">
+          {[
+            { key: "drafts", label: "Drafts", count: draftsReady.length },
+            { key: "unread", label: "Unread", count: unreadEmails.length },
+            { key: "all", label: "All", count: emails.length },
+          ].map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setInboxTab(t.key as "drafts" | "unread" | "all")}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                inboxTab === t.key
+                  ? "bg-[var(--color-gold)] text-[#1A1816]"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
+            >
+              {t.label} {t.count}
+            </button>
+          ))}
         </div>
         <Button variant="ghost" size="sm" onClick={fetchEmails} loading={fetching}>
           <RefreshCw className={`w-4 h-4 mr-1.5 ${fetching ? "animate-spin" : ""}`} />
@@ -166,13 +172,13 @@ export function InboxClient() {
       )}
 
       {/* 邮件列表 */}
-      {emails.length === 0 ? (
+      {filteredEmails.length === 0 ? (
         <Card className="text-center py-12 text-sm text-[var(--color-text-secondary)]">
-          No emails yet. When a client emails you, they&apos;ll appear here.
+          {inboxTab === "drafts" ? "No drafts ready." : inboxTab === "unread" ? "No unread emails." : "No emails yet."}
         </Card>
       ) : (
         <div className="space-y-2">
-          {emails.map((email) => (
+          {filteredEmails.map((email) => (
             <button
               key={email.id}
               onClick={async () => {
