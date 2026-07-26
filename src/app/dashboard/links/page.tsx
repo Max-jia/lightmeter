@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LinkIcon, Copy, ExternalLink, Plus, X, FileText } from "lucide-react";
+import { LoadingDots } from "@/components/ui/loading-dots";
 import toast from "react-hot-toast";
 import { CONTRACT_TEMPLATES, renderContract } from "@/lib/contracts/templates";
 
@@ -92,23 +93,7 @@ export default function LinksPage() {
     window.open(`/l/${slug}`, "_blank");
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-2">
-        {[1,2,3].map(i => (
-          <div key={i} className="skeleton-enter p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)]" style={{animationDelay: `${i*0.08}s`}}>
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl animate-shimmer bg-[var(--color-bg-elevated)]" />
-              <div className="flex-1 space-y-2">
-                <div className="h-3.5 w-36 rounded animate-shimmer bg-[var(--color-bg-elevated)]" />
-                <div className="h-2.5 w-52 rounded animate-shimmer bg-[var(--color-bg-elevated)]" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
+  if (loading) return <LoadingDots />;
 
   return (
     <div className="space-y-6">

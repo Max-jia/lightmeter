@@ -6,6 +6,7 @@ import { Badge, Avatar } from "@/components/ui/misc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X, Pencil, Check, ArrowLeft } from "lucide-react";
+import { LoadingDots } from "@/components/ui/loading-dots";
 import toast from "react-hot-toast";
 
 const EVENT_TYPES = ["wedding", "portrait", "event", "engagement", "other"] as const;
@@ -109,21 +110,7 @@ export default function ClientsPage() {
     return m[s] || "default";
   };
 
-  if (loading) return (
-    <div className="space-y-2">
-      {[1,2,3,4,5].map(i => (
-        <div key={i} className="skeleton-enter p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)]" style={{animationDelay: `${i*0.06}s`}}>
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full animate-shimmer bg-[var(--color-bg-elevated)]" />
-            <div className="flex-1 space-y-2">
-              <div className="h-3.5 w-28 rounded animate-shimmer bg-[var(--color-bg-elevated)]" />
-              <div className="h-2.5 w-44 rounded animate-shimmer bg-[var(--color-bg-elevated)]" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  if (loading) return <LoadingDots />;
 
   return (
     <div className="space-y-6">

@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, Badge, Skeleton } from "@/components/ui/misc";
 import { Mail, Zap, ChevronRight, Sparkles, Send, Edit3, Check, X, ArrowLeft, RefreshCw, Trash2 } from "lucide-react";
 import { useApi } from "@/hooks/use-api";
+import { LoadingDots } from "@/components/ui/loading-dots";
 
 // ============================================================
 // TypeScript types matching the DB schema
@@ -104,24 +105,9 @@ export function InboxClient() {
     );
   }
 
-  // 初始加载 — 骨架邮件卡片
+  // 初始加载 — 三圆点
   if (gmailConnected === null && !fetching) {
-    return (
-      <div className="space-y-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="inbox-skeleton-card p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-subtle)]" style={{ animationDelay: `${i * 0.1}s` }}>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[var(--color-bg-elevated)]" />
-              <div className="flex-1 space-y-2">
-                <div className="h-3 w-32 rounded bg-[var(--color-bg-elevated)]" />
-                <div className="h-2.5 w-48 rounded bg-[var(--color-bg-elevated)]" />
-              </div>
-              <div className="h-2 w-12 rounded bg-[var(--color-bg-elevated)]" />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <LoadingDots />;
   }
 
   // 邮件详情视图

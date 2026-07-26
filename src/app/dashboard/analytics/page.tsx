@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/misc";
+import { LoadingDots } from "@/components/ui/loading-dots";
 import { DollarSign, Users, CalendarDays, TrendingUp } from "lucide-react";
 
 export default function AnalyticsPage() {
@@ -18,9 +19,7 @@ export default function AnalyticsPage() {
       });
   }, []);
 
-  if (loading) {
-    return <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-24 animate-shimmer rounded-xl bg-[var(--color-bg-surface)]" />)}</div>;
-  }
+  if (loading) return <LoadingDots />;
 
   const hasData = stats && (stats.totalClients > 0 || (stats.monthlyRevenue && stats.monthlyRevenue !== "$0"));
 
