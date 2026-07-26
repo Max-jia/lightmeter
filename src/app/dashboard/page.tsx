@@ -56,7 +56,7 @@ export default async function DashboardHome() {
       supabase.from("emails").select("*").eq("user_id", user.id).eq("status", "draft_ready").order("received_at", { ascending: false }).limit(5),
       supabase.from("payments").select("amount").eq("user_id", user.id).eq("status", "completed").gte("paid_at", monthStart),
       // 快捷面板数据
-      supabase.from("emails").select("id, status").eq("user_id", user.id).in("status", ["unread","read"]),
+      supabase.from("emails").select("id").eq("user_id", user.id).eq("status", "unread"),
       supabase.from("links").select("id, status").eq("user_id", user.id).in("status", ["pending","viewed"]),
       supabase.from("clients").select("id").eq("user_id", user.id).not("event_date", "is", null).neq("status", "completed").neq("status", "archived").gte("event_date", todayStr).lte("event_date", weekEnd),
     ]);
