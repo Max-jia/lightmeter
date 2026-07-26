@@ -154,7 +154,7 @@ export default async function DashboardHome() {
           {[
             {
               count: unreadCount,
-              label: "Unread emails",
+              label: "Unread inbox",
               icon: Mail,
               href: "/dashboard/inbox",
               highlight: unreadCount > 0,
