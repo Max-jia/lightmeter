@@ -36,17 +36,8 @@ export function InboxClient() {
   const [gmailConnected, setGmailConnected] = useState<boolean | null>(null);
   const [fetching, setFetching] = useState(false);
 
-  // 检查 Gmail 是否已连接 + 拉取邮件
-  const fetchEmails = useCallback(async () => {
-    setFetching(true);
-    // 先尝试拉取最新邮件
-    const fetchResult = await call("/api/emails/fetch");
-    if (fetchResult?.error === "Gmail not connected") {
-      setGmailConnected(false);
-      setFetching(false);
-      return;
-    }
-    // 拉取数据库中的邮件
+  // 加载已有邮件（快速展示）
+  const loadEmails = useCallback(async () => {
     const res = await fetch("/api/emails/list");
     if (res.ok) {
       const data = await res.json();
@@ -55,11 +46,24 @@ export function InboxClient() {
     } else if (res.status === 400) {
       setGmailConnected(false);
     }
+  }, []);
+
+  // 从 Gmail 拉取最新邮件（手动触发）
+  const fetchEmails = useCallback(async () => {
+    setFetching(true);
+    const fetchResult = await call("/api/emails/fetch");
+    if (fetchResult?.error === "Gmail not connected") {
+      setGmailConnected(false);
+      setFetching(false);
+      return;
+    }
+    // 拉取完刷新列表
+    await loadEmails();
     setFetching(false);
-  }, [call]);
+  }, [call, loadEmails]);
 
   useEffect(() => {
-    fetchEmails();
+    loadEmails();
   }, []);
 
   // 处理单封邮件（调用 AI）
